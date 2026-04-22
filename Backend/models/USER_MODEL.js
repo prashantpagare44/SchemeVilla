@@ -1,28 +1,32 @@
-const Usermodel={
+import mongoose from 'mongoose';
 
-    name:String,
+const userSchema = new mongoose.Schema({
+    name: String,
     phone: String,
-    role: "admin" | "distributor" | "rep" | "retailer",
+    role: {
+        type: String,
+        enum: ["admin", "distributor", "rep", "retailer"],
+        default: "retailer"
+    },
 
-    isActive: Boolean,
+    isActive: { type: Boolean, default: true },
 
-  // Relationships
-  distributorId: ObjectId,   // for rep & retailer
-  companyId: ObjectId,       // for rep
-  zoneId: ObjectId,          // for all
+    // Relationships
+    distributorId: mongoose.Schema.Types.ObjectId,   // for rep & retailer
+    companyId: mongoose.Schema.Types.ObjectId,       // for rep
+    zoneId: mongoose.Schema.Types.ObjectId,          // for all
 
-  // Retailer specific
-  shopName: String,
+    // Retailer specific
+    shopName: String,
 
-  // Rep specific
-  bankDetails: {
-    accountNumber: String,
-    ifsc: String
-  },
+    // Rep specific
+    bankDetails: {
+        accountNumber: String,
+        ifsc: String
+    },
 
-  createdAt: Date
+    createdAt: { type: Date, default: Date.now }
+});
 
-}
-
-const User= mongoose.model('user', Usermodel);
+const User = mongoose.model('user', userSchema);
 export default User;
