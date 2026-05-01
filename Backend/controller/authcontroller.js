@@ -4,12 +4,17 @@ import jwt from 'jsonwebtoken';
 
 const client = twilio(process.env.ACCOUNT_SID, process.env.AUTH_TOKEN);
 
-// Login / Send OTP (Ab yeh direct Twilio se OTP bhejega)
+
 export const login = async (req, res) => {
   try {
     const { phone } = req.body;
     if (!phone) {
       return res.status(400).json({ message: "Phone is required" });
+    }
+
+    // TESTING BYPASS: Agar phone number 999 se start hota hai, toh SMS mat bhejo
+    if (phone.startsWith("999")) {
+        return res.status(200).json({ message: "Test OTP bypassed. Use OTP 123456 to login." });
     }
 
     // Send OTP using Twilio
@@ -36,15 +41,23 @@ export const verifyOtp = async (req, res) => {
     if (!phone || !otp) {
       return res.status(400).json({ message: "Phone and OTP are required" });
     }
-    
-    const verificationCheck = await client.verify.v2
-      .services(process.env.VERIFY_SERVICE_SID)
-      .verificationChecks.create({
-        to: `+91${phone}`,
-        code: otp,
-      });
+
+    let isApproved = false;
+
+    // TESTING BYPASS: Check for test numbers
+    if (phone.startsWith("999") && otp === "123456") {
+        isApproved = true;
+    } else {
+        const verificationCheck = await client.verify.v2
+          .services(process.env.VERIFY_SERVICE_SID)
+          .verificationChecks.create({
+            to: `+91${phone}`,
+            code: otp,
+          });
+        isApproved = verificationCheck.status === "approved";
+    }
       
-    if (verificationCheck.status === "approved") {
+    if (isApproved) {
      
       let user = await User.findOne({ phone });
       
@@ -83,9 +96,6 @@ export const Logout = (req, res) => {
   return res.status(200).json({ message: "Logout successful" });
 }
 
-// @desc    Get user profile
-// @route   GET /auth/api/profile
-// @access  Private (Protected)
 export const getProfile = async (req, res) => {
   try {
     

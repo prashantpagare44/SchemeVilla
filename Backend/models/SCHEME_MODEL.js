@@ -1,24 +1,26 @@
-const Schememodel = {
-  companyId: ObjectId,
-  repId: ObjectId,
+import mongoose from 'mongoose';
 
-  productName: String,
-  schemeType: "flat" | "slab" | "combo" | "free",
+const schemeSchema = new mongoose.Schema({
+    companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true },
+    repId: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true }, // Rep who created it
+    
+    productName: { type: String, required: true },
+    schemeType: { 
+        type: String, 
+        enum: ['flat', 'slab', 'combo', 'free'], 
+        required: true 
+    },
+    
+    discount: { type: Number, required: true },
+    terms: { type: String },
+    
+    validFrom: { type: Date, required: true },
+    expiryDate: { type: Date, required: true },
+    
+    zoneIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Zone', required: true }],
+    status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
+    approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'user' }, // Distributor who approves it
+}, { timestamps: true });
 
-  discount: Number,
-  terms: String,
-
-  validFrom: Date,
-  expiryDate: Date,
-
-  zoneIds: [ObjectId],
-
-  status: "pending" | "approved" | "rejected",
-
-  approvedBy: ObjectId, // distributor
-
-  createdAt: Date
-}
-
-const Scheme = mongoose.model('Scheme', Schememodel);
+const Scheme = mongoose.model('Scheme', schemeSchema);
 export default Scheme;

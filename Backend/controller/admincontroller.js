@@ -1,15 +1,17 @@
 import User from '../models/USER_MODEL.js';
+import DistributorProfile from '../models/DISTRIBUTOR_MODEL.js';
+import RepProfile from '../models/REP_MODEL.js';
 
 export const Distributor = async (req, res) => {
     try {
-        const { name, phone, companyId, zoneId } = req.body;
+        const { name, phone, companyId, zoneIds } = req.body;
 
         // 1. Check for empty fields
-        if (!name || !phone || !companyId || !zoneId) {
-            return res.status(400).json({ message: "All fields are required" });
+        if (!name || !phone || !companyId || !zoneIds || !Array.isArray(zoneIds) || zoneIds.length === 0) {
+            return res.status(400).json({ message: "All fields are required, and zoneIds must be a non-empty array" });
         }
 
-        // 2. Phone Number Validation (Exactly 10 digits)
+       
         const phoneRegex = /^[0-9]{10}$/;
         if (!phoneRegex.test(phone)) {
             return res.status(400).json({ message: "Invalid phone number. Must be exactly 10 digits." });
@@ -22,9 +24,10 @@ export const Distributor = async (req, res) => {
         }
 
         // 4. Create Distributor in DB
-        const newDistributor = await User.create({ name, phone, role: 'distributor', companyId, zoneId });
+        const newDistributor = await User.create({ name, phone, role: 'distributor' });
+        const profile = await DistributorProfile.create({ userId: newDistributor._id, companyId, zoneIds });
 
-        return res.status(201).json({ message: "Distributor created successfully", user: newDistributor });
+        return res.status(201).json({ message: "Distributor created successfully", user: newDistributor, profile });
     } catch (error) {
         return res.status(500).json({ message: "Error creating distributor", error: error.message });
     }
@@ -32,11 +35,11 @@ export const Distributor = async (req, res) => {
 
 export const Rep = async (req, res) => {
     try {
-        const { name, phone, companyId, zoneId, distributorId } = req.body;
+        const { name, phone, companyId, zoneIds, distributorId } = req.body;
 
         
-        if (!name || !phone || !companyId || !zoneId || !distributorId) {
-            return res.status(400).json({ message: "All fields are required including distributorId" });
+        if (!name || !phone || !companyId || !zoneIds || !Array.isArray(zoneIds) || zoneIds.length === 0 || !distributorId) {
+            return res.status(400).json({ message: "All fields are required, and zoneIds must be a non-empty array" });
         }
 
         const phoneRegex = /^[0-9]{10}$/;
@@ -50,9 +53,10 @@ export const Rep = async (req, res) => {
         }
 
         // Create Rep in DB
-        const newRep = await User.create({ name, phone, role: 'rep', companyId, zoneId, distributorId });
+        const newRep = await User.create({ name, phone, role: 'rep' });
+        const profile = await RepProfile.create({ userId: newRep._id, distributorId, zoneIds });
 
-        return res.status(201).json({ message: "Sales Rep created successfully", user: newRep });
+        return res.status(201).json({ message: "Sales Rep created successfully", user: newRep, profile });
     } catch (error) {
         return res.status(500).json({ message: "Error creating rep", error: error.message });
     }

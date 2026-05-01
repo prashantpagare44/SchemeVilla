@@ -11,20 +11,6 @@ const userSchema = new mongoose.Schema({
 
     isActive: { type: Boolean, default: true },
 
-    // Relationships
-    distributorId: mongoose.Schema.Types.ObjectId,   // for rep & retailer
-    companyId: mongoose.Schema.Types.ObjectId,       // for rep
-    zoneId: mongoose.Schema.Types.ObjectId,          // for all
-
-    // Retailer specific
-    shopName: String,
-
-    // Rep specific
-    bankDetails: {
-        accountNumber: String,
-        ifsc: String
-    },
-
     createdAt: { type: Date, default: Date.now }
 });
 
