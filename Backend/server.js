@@ -35,6 +35,11 @@ app.use('/api/masterdata', masterRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
+// Base route for browser testing and health check
+app.get('/', (req, res) => {
+    res.status(200).send("Welcome to Scheme-vila API! The backend server is running successfully 🚀");
+});
+
 app.listen(PORT,()=>{
     console.log(`Server is running on port ${PORT}`);
 })
