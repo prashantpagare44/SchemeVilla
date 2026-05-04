@@ -2,8 +2,7 @@ import axios from 'axios';
 
 // Ek axios ka instance create karein
 const api = axios.create({
-
-    baseURL: 'https://schemevilla.onrender.com/api', 
+    baseURL: import.meta.env.VITE_API_URL || 'https://schemevilla.onrender.com/api',
 });
 
 api.interceptors.request.use(
