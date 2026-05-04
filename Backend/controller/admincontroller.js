@@ -1,8 +1,9 @@
 import User from '../models/USER_MODEL.js';
 import DistributorProfile from '../models/DISTRIBUTOR_MODEL.js';
 import RepProfile from '../models/REP_MODEL.js';
+import mongoose from 'mongoose'; 
 
-export const Distributor = async (req, res) => {
+export const Distributor = async (req, res) => { 
     try {
         const { name, phone, password ,companyId, zoneIds } = req.body;
 
@@ -34,7 +35,7 @@ export const Distributor = async (req, res) => {
 
 export const Rep = async (req, res) => {
     try {
-        const { name, phone, companyId, zoneIds, distributorId } = req.body;
+        const { name, phone, password, companyId, zoneIds, distributorId } = req.body;
 
         
         if (!name || !phone || !companyId || !zoneIds || !Array.isArray(zoneIds) || zoneIds.length === 0 || !distributorId) {
@@ -46,13 +47,29 @@ export const Rep = async (req, res) => {
             return res.status(400).json({ message: "Invalid phone number. Must be exactly 10 digits." });
         }
 
+        // ID validation: Check if companyId and zoneIds are valid MongoDB ObjectIDs
+        if (!mongoose.Types.ObjectId.isValid(companyId)) {
+            return res.status(400).json({ message: "Invalid Company ID format. Must be a 24-character MongoDB ID." });
+        }
+        if (!zoneIds.every(id => mongoose.Types.ObjectId.isValid(id))) {
+            return res.status(400).json({ message: "Invalid Zone ID format. Must be a 24-character MongoDB ID." });
+        }
+
+        // ID validation
+        if (!mongoose.Types.ObjectId.isValid(companyId) || !mongoose.Types.ObjectId.isValid(distributorId)) {
+            return res.status(400).json({ message: "Invalid Company or Distributor ID format." });
+        }
+        if (!zoneIds.every(id => mongoose.Types.ObjectId.isValid(id))) {
+            return res.status(400).json({ message: "Invalid Zone ID format." });
+        }
+
         const existingUser = await User.findOne({ phone });
         if (existingUser) {
             return res.status(400).json({ message: "User with this phone already exists" });
         }
 
         // Create Rep in DB
-        const newRep = await User.create({ name, phone, role: 'rep' });
+        const newRep = await User.create({ name, phone, password, role: 'rep' }); // Password add kiya
         const profile = await RepProfile.create({ userId: newRep._id, distributorId, zoneIds });
 
         return res.status(201).json({ message: "Sales Rep created successfully", user: newRep, profile });

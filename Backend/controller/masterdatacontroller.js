@@ -25,10 +25,12 @@ export const CreateZone = async(req,res)=>{
 export const getZone = async(req,res)=>{
     const {name, city} = req.query;
     try{
-        if(!name || !city)
-        {
-            return res.status(400).json({ message: "Name and city are required" });
+        // Agar query parameters nahi hain, toh saare zones return karo (Dropdown ke liye)
+        if (!name && !city) {
+            const zones = await zoneModel.find({});
+            return res.status(200).json({ zones });
         }
+        
         const zone = await zoneModel.findOne({ name, city });
         if(!zone){
             return res.status(404).json({ message: "Zone not found" });
@@ -65,8 +67,10 @@ export const getCompany = async(req,res)=>{
      const {name} = req.query;
 
      try{
-        if(!name){
-            return res.status(400).json({ message: "Name is required" });
+        // Agar name nahi hai, toh saari companies return karo (Dropdown ke liye)
+        if (!name) {
+            const companies = await Company.find({}).populate('zoneIds', 'name city');
+            return res.status(200).json({ companies });
         }
         const company = await Company.findOne({ name }).populate('zoneIds', 'name city');
         if(!company){
