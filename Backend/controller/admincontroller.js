@@ -4,10 +4,9 @@ import RepProfile from '../models/REP_MODEL.js';
 
 export const Distributor = async (req, res) => {
     try {
-        const { name, phone, companyId, zoneIds } = req.body;
+        const { name, phone, password ,companyId, zoneIds } = req.body;
 
-        // 1. Check for empty fields
-        if (!name || !phone || !companyId || !zoneIds || !Array.isArray(zoneIds) || zoneIds.length === 0) {
+        if (!name || !password ||  !phone || !companyId || !zoneIds || !Array.isArray(zoneIds) || zoneIds.length === 0) {
             return res.status(400).json({ message: "All fields are required, and zoneIds must be a non-empty array" });
         }
 
@@ -17,14 +16,14 @@ export const Distributor = async (req, res) => {
             return res.status(400).json({ message: "Invalid phone number. Must be exactly 10 digits." });
         }
 
-        // 3. Check if user already exists
+        
         const existingUser = await User.findOne({ phone });
         if (existingUser) {
             return res.status(400).json({ message: "User with this phone already exists" });
         }
 
-        // 4. Create Distributor in DB
-        const newDistributor = await User.create({ name, phone, role: 'distributor' });
+        
+        const newDistributor = await User.create({ name, phone, password ,role: 'distributor' });
         const profile = await DistributorProfile.create({ userId: newDistributor._id, companyId, zoneIds });
 
         return res.status(201).json({ message: "Distributor created successfully", user: newDistributor, profile });

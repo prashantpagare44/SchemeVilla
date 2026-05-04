@@ -11,7 +11,7 @@ import RepProfile from './models/REP_MODEL.js';
 import RetailerProfile from './models/RETAILER_MODEL.js';
 import Product from './models/PRODUCT_MODEL.js';
 
-// Helper function token generate karne ke liye
+
 const generateToken = (user) => jwt.sign({ id: user._id, phone: user.phone, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
 const seedData = async () => {
@@ -19,18 +19,17 @@ const seedData = async () => {
         await connectDB();
         console.log("Database connected. Clearing old test data...");
 
-        // Pehle purana data clear karte hain taaki conflicts na hon
         await Promise.all([User.deleteMany(), Zone.deleteMany(), Company.deleteMany(), DistributorProfile.deleteMany(), RepProfile.deleteMany(), RetailerProfile.deleteMany(), Product.deleteMany()]);
 
         console.log("Creating Seed Data...");
 
-        // 1. Create Zone
+    
         const zone = await Zone.create({ name: "Delhi NCR", city: "New Delhi" });
 
-        // 2. Create Admin
+    
         const admin = await User.create({ name: "Super Admin", phone: "9990000000", role: "admin" });
 
-        // 3. Create Distributor
+        
         const distributor = await User.create({ name: "Raju Distributor", phone: "9990000001", role: "distributor" });
         const company = await Company.create({ name: "Raju Traders", distributorId: distributor._id, zoneIds: [zone._id] });
         await DistributorProfile.create({ userId: distributor._id, companyId: company._id, zoneIds: [zone._id] });
