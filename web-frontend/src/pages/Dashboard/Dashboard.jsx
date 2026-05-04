@@ -1,6 +1,8 @@
 import React from 'react'
 import Admin from './Admin.jsx';
 import Distributor from './Distributor.jsx';
+import Sidebar from '../../component/Sidebar';  
+import TopNavbar from '../../component/TopNavbar';
 import Rep from './Rep.jsx';
 
 
@@ -15,7 +17,9 @@ function Dashboard() {
         return <Rep />
     }           
   return (
-    <></>
+    <>
+   
+    </>
   )
 }
 

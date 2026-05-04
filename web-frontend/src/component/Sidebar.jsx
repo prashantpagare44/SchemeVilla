@@ -67,7 +67,7 @@ function Sidebar() {
         })}
     </nav>
 
-    {/* User Profile Section */}
+
     <div className="p-4 border-t border-slate-100">
         <div className="bg-slate-50 p-4 rounded-xl flex items-center gap-3 border border-slate-100">
             <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold shadow-inner">
