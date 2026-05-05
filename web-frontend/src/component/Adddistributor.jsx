@@ -26,7 +26,7 @@ function Adddistributor() {
     const fetchMasterData = async () => {
       try {
         const [compRes, zoneRes] = await Promise.all([
-          api.get('/masterdata/company'), // Apni backend route ke hisaab se adjust karein (e.g., /api/master/company)
+          api.get('/masterdata/company'), 
           api.get('/masterdata/zone')
         ]);
         setCompanies(compRes.data.companies || []);
@@ -64,7 +64,7 @@ function Adddistributor() {
       
       
       setTimeout(() => {
-        navigate('/admin');
+        navigate('/dashboard');
       }, 1500);
 
     } catch (error) {
@@ -182,7 +182,7 @@ function Adddistributor() {
           <div className="flex justify-end gap-3 mt-8">
             <button 
               type="button" 
-              onClick={() => navigate('/admin')}
+              onClick={() => navigate('/dashboard')}
               className="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-lg font-medium hover:bg-slate-50 transition-colors"
             >
               Cancel

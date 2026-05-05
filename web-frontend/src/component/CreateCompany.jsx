@@ -4,6 +4,7 @@ import api from '../api/axiosConfig';
 
 function CreateCompany() {
 
+    const navigate = useNavigate();
     const [companyData, setCompanyData] = useState({ name: '', zoneIds: [] });
       const [allZones, setAllZones] = useState([]);
       const [masterLoading, setMasterLoading] = useState({ zone: false, company: false });
