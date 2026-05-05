@@ -8,6 +8,7 @@ function CreateCompany() {
       const [allZones, setAllZones] = useState([]);
       const [masterLoading, setMasterLoading] = useState({ zone: false, company: false });
       const [masterMessage, setMasterMessage] = useState({ zone: null, company: null });
+      const [zoneError, setZoneError] = useState(null);
       
 
     useEffect(() => {
@@ -17,6 +18,7 @@ function CreateCompany() {
           setAllZones(res.data.zones || []);
         } catch (error) {
           console.error("Failed to fetch zones for master data form", error);
+          setZoneError(error.response?.data?.message || "Server Error: Zones fetch nahi ho paye.");
         }
     };
     fetchZones();
@@ -36,6 +38,13 @@ function CreateCompany() {
 
    const handleCompanySubmit = async (e) => {
       e.preventDefault();
+
+      // Frontend Validation: Agar koi zone tick nahi kiya hai, toh API call mat karo
+      if (companyData.zoneIds.length === 0) {
+        setMasterMessage({ zone: null, company: { type: 'error', text: 'Please tick/select at least one zone from the list above.' } });
+        return;
+      }
+
       setMasterLoading(prev => ({ ...prev, company: true }));
       setMasterMessage(prev => ({ ...prev, company: null }));
       try {
@@ -109,7 +118,9 @@ function CreateCompany() {
                         />
                         <span className="text-slate-700 font-medium">{zone.name} <span className="text-slate-400 font-normal text-xs ml-1">({zone.city})</span></span>
                       </label>
-                    )) : (
+                    )) : zoneError ? (
+                      <p className="text-sm text-red-500 font-medium text-center py-4">{zoneError}</p>
+                    ) : (
                       <p className="text-sm text-slate-500 text-center py-4">No zones found. Please create a zone first.</p>
                     )}
                   </div>
@@ -118,7 +129,7 @@ function CreateCompany() {
                   <button type="button" onClick={() => navigate('/dashboard')} className="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold hover:bg-slate-50 transition-colors">
                     Cancel
                   </button>
-                  <button type="submit" disabled={masterLoading.company} className="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors disabled:bg-blue-400 shadow-sm shadow-blue-200">
+                  <button type="submit" disabled={masterLoading.company || allZones.length === 0} className="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors disabled:bg-blue-400 disabled:opacity-60 shadow-sm shadow-blue-200">
                     {masterLoading.company ? 'Creating...' : 'Create Company'}
                   </button>
                 </div>
