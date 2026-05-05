@@ -94,6 +94,13 @@ function Admin() {
 const addDistributor = async(req,res)=>{
     navigate('/adddistributor');
 }
+const addRep = () => {
+    navigate('/addrep');
+}
+const addProduct = () => {    
+  navigate('/addproduct');
+}
+
   return (
     <div className="flex h-screen bg-slate-50">
       
@@ -111,11 +118,14 @@ const addDistributor = async(req,res)=>{
               <p className="text-sm text-slate-500">Welcome back, here's what's happening today.</p>
             </div>
             <div className="flex gap-3">
-              <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors shadow-sm">
+              <button onClick={addProduct}   className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors shadow-sm">
                 Add Product
               </button>
               <button onClick = {addDistributor} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm shadow-blue-200">
                 + New Distributor
+              </button>
+              <button onClick={addRep} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm shadow-blue-200">
+                + New Rep
               </button>
               <button onClick = {createzone} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm shadow-blue-200">
                 + New Zone

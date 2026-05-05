@@ -7,6 +7,8 @@ import ProtectedRoute from './ProtectedRoute.jsx';
 import CreateZone from './component/CreateZone.jsx';
 import CreateCompany from './component/CreateCompany.jsx';
 import Chat from './component/Chat.jsx';
+import AddRep from './component/AddRep.jsx';
+import Addproduct from './component/Addproduct.jsx';
 
 import './App.css'
 
@@ -30,7 +32,8 @@ function App() {
        <Route path="/createzone" element={<CreateZone />} />
        <Route path="/createcompany" element={<CreateCompany />} />
        <Route path="/chat" element={<Chat />} />
-
+       <Route path="/addrep" element={<AddRep />} />
+        <Route path="/addproduct" element={<Addproduct />} />
       </Routes>
     </BrowserRouter>
   )
