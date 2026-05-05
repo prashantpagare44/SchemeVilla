@@ -33,6 +33,30 @@ export const Distributor = async (req, res) => {
     }
 }
 
+export const getDistributor = async (req, res) => {
+    try {
+        const distributors = await DistributorProfile.find()
+            .populate('userId', 'name phone role')
+            .populate('companyId', 'name')
+            .populate('zoneIds', 'name city');
+        return res.status(200).json({ success: true, count: distributors.length, data: distributors });
+    } catch (error) {
+        return res.status(500).json({ message: "Error fetching distributors", error: error.message });
+    }
+}
+
+export const getRep = async (req, res) => {
+    try {
+        const reps = await RepProfile.find()
+            .populate('userId', 'name phone role')
+            .populate('distributorId', 'name phone')
+            .populate('zoneIds', 'name city');
+        return res.status(200).json({ success: true, count: reps.length, data: reps });
+    } catch (error) {
+        return res.status(500).json({ message: "Error fetching reps", error: error.message });
+    }
+}
+
 export const Rep = async (req, res) => {
     try {
         const { name, phone, password, companyId, zoneIds, distributorId } = req.body;
