@@ -44,16 +44,18 @@ export const getZone = async(req,res)=>{
 }
 
 export const Createcompany = async(req,res)=>{
-    const { name, distributorId, zoneIds } = req.body;
+    // Distributor ID yahan se hata diya hai. Company pehle banegi, distributor baad mein.
+    const { name, zoneIds } = req.body;
     try{
-        if(!name || !distributorId || !zoneIds || !Array.isArray(zoneIds) || zoneIds.length === 0){
-            return res.status(400).json({ message: "All fields are required and zoneIds must be a non-empty array" });
+        // Validation se distributorId hata diya.
+        if(!name || !zoneIds || !Array.isArray(zoneIds) || zoneIds.length === 0){
+            return res.status(400).json({ message: "Company Name and at least one Zone ID are required." });
         }
         const existingCompany = await Company.findOne({ name });
         if(existingCompany){
             return res.status(400).json({ message: "Company with this name already exists" });
         }
-        const newCompany = await Company.create({ name, distributorId, zoneIds });
+        const newCompany = await Company.create({ name, zoneIds });
         return res.status(201).json({ message: "Company created successfully", company: newCompany });
 
     }catch(error)
