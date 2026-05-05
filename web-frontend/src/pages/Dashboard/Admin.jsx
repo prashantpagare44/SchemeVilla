@@ -8,9 +8,26 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 
 function Admin() {
   const [isMounted, setIsMounted] = useState(false);
+  const [dashboardData, setDashboardData] = useState(null);
+  const [distributorCount, setDistributorCount] = useState(0);
 
   useEffect(() => {
     setIsMounted(true);
+    
+    // Backend se real-time dashboard data fetch karna
+    const fetchDashboardData = async () => {
+      try {
+        const [statsRes, distRes] = await Promise.all([
+          api.get('/dashboard'),
+          api.get('/admin/distributors')
+        ]);
+        if (statsRes.data.success) setDashboardData(statsRes.data.data);
+        if (distRes.data.success) setDistributorCount(distRes.data.count);
+      } catch (error) {
+        console.error("Error fetching dashboard data", error);
+      }
+    };
+    fetchDashboardData();
   }, []);
 
 
@@ -30,10 +47,10 @@ function Admin() {
  
 
   const statCards = [
-    { title: 'Total Sales', value: '₹ 0.00', valueColor: 'text-slate-800' },
-    { title: 'Total Orders', value: '0', valueColor: 'text-slate-800' },
-    { title: 'Total Outstanding', value: '₹ 0.00', valueColor: 'text-red-500' },
-    { title: 'Active Distributors', value: '0', valueColor: 'text-slate-800' },
+    { title: 'Total Sales', value: `₹ ${dashboardData?.totalSales?.toLocaleString('en-IN') || '0'}`, valueColor: 'text-slate-800' },
+    { title: 'Total Orders', value: dashboardData?.totalOrders?.toString() || '0', valueColor: 'text-slate-800' },
+    { title: 'Total Outstanding', value: `₹ ${dashboardData?.totalOutstanding?.toLocaleString('en-IN') || '0'}`, valueColor: 'text-red-500' },
+    { title: 'Active Distributors', value: distributorCount.toString(), valueColor: 'text-slate-800' },
   ];
 
 
