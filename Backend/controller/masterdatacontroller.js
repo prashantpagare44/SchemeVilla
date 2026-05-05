@@ -49,10 +49,10 @@ export const getZone = async(req,res)=>{
 }
 
 export const Createcompany = async(req,res)=>{
-    // Distributor ID yahan se hata diya hai. Company pehle banegi, distributor baad mein.
+    
     const { name, zoneIds } = req.body;
     try{
-        // Validation se distributorId hata diya.
+    
         if(!name || !zoneIds || !Array.isArray(zoneIds) || zoneIds.length === 0){
             return res.status(400).json({ message: "Company Name and at least one Zone ID are required." });
         }
