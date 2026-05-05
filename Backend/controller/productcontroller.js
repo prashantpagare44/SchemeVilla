@@ -23,7 +23,9 @@ export const getProducts = async (req, res) => {
   const {name, sku} = req.query; // Use req.query for GET requests
     try{
         if(!name && !sku){
-            return res.status(400).json({ message: "Name or SKU is required" });
+            // Agar query mein name ya sku nahi hai, toh saare products fetch karke bhej do
+            const products = await Product.find({}).populate('distributorId', 'name phone');
+            return res.status(200).json({ success: true, data: products });
         }
         let filter =[];
 
@@ -33,8 +35,8 @@ export const getProducts = async (req, res) => {
         if(sku){
             filter.push({ sku: { $regex: sku, $options: 'i' } });
         }
-        const products = await Product.find({ $or: filter });
-        return res.status(200).json({ products });
+        const products = await Product.find({ $or: filter }).populate('distributorId', 'name phone');
+        return res.status(200).json({ success: true, data: products });
     }catch(error)
     {
        return res.status(500).json({ message: "Error fetching products", error: error.message });
