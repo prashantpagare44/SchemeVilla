@@ -24,15 +24,22 @@ function AddProduct() {
 
   // Fetch initial data
   const fetchData = async () => {
+    // 1. Pehle Distributors fetch karein
     try {
-      const [prodRes, distRes] = await Promise.all([
-        api.get('/products/get-products'),
-        api.get('/admin/distributors') // Make sure this route is working
-      ]);
-      setProducts(prodRes.data.data || []);
+      const distRes = await api.get('/admin/distributors');
       setDistributors(distRes.data.data || []);
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error("Error fetching distributors:", error);
+    }
+
+    // 2. Phir Products fetch karein
+    try {
+      const prodRes = await api.get('/products/get-products');
+      setProducts(prodRes.data.data || prodRes.data.products || []);
+      setTableError(null);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      setTableError(error.response?.data?.message || "Server Error: API route failed.");
     }
   };
 
