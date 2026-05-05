@@ -25,12 +25,17 @@ export const CreateZone = async(req,res)=>{
 export const getZone = async(req,res)=>{
     const {name, city} = req.query;
     try{
-        // Agar query parameters nahi hain, toh saare zones return karo (Dropdown ke liye)
+        
         if (!name && !city) {
             const zones = await zoneModel.find({});
             return res.status(200).json({ zones });
         }
         
+    
+        if (!name || !city) {
+            return res.status(400).json({ message: "Both name and city are required for specific search" });
+        }
+
         const zone = await zoneModel.findOne({ name, city });
         if(!zone){
             return res.status(404).json({ message: "Zone not found" });
