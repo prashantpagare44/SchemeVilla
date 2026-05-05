@@ -2,7 +2,11 @@ import React from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Login from './pages/Login.jsx';
 import Dashboard from './pages/Dashboard/Dashboard.jsx';
+import Adddistributer from './component/Adddistributor.jsx';
 import ProtectedRoute from './ProtectedRoute.jsx';
+import CreateZone from './component/CreateZone.jsx';
+import CreateCompany from './component/CreateCompany.jsx';
+
 import './App.css'
 
 function App() {
@@ -21,6 +25,10 @@ function App() {
         } 
        /> 
        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+       <Route path="/adddistributor" element={<Adddistributer />} />
+       <Route path="/createzone" element={<CreateZone />} />
+       <Route path="/createcompany" element={<CreateCompany />} />
+        
       </Routes>
     </BrowserRouter>
   )
