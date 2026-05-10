@@ -9,6 +9,7 @@ import CreateCompany from './component/CreateCompany.jsx';
 import Chat from './component/Chat.jsx';
 import AddRep from './component/AddRep.jsx';
 import Addproduct from './component/Addproduct.jsx';
+import Managedistributor from './pages/Managedistributor.jsx';
 
 import './App.css'
 
@@ -34,6 +35,7 @@ function App() {
        <Route path="/chat" element={<Chat />} />
        <Route path="/addrep" element={<AddRep />} />
         <Route path="/addproduct" element={<Addproduct />} />
+        <Route path="/dashboard/distributors" element={<Managedistributor />} />
       </Routes>
     </BrowserRouter>
   )

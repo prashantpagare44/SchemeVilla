@@ -45,7 +45,7 @@ function Sidebar() {
         <p className="text-xs text-blue-600 mt-2 font-semibold uppercase tracking-wider">{userRole} Portal</p>
     </div>
     
-    {/* Navigation Menu */}
+    
     <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 px-2">Menu</p>
         {menuLinks.map((item, index) => {
