@@ -44,7 +44,7 @@ export const Zonemanagement = () => {
             
 
             <div className="flex flex-col flex-1 overflow-hidden">
-                {/* Top Navigation */}
+            
                 <TopNavbar />
                 
                 <main className="flex-1 overflow-y-auto p-6">
