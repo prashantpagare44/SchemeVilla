@@ -47,6 +47,40 @@ export const getZone = async(req,res)=>{
     }
 
 }
+export const UpdateZone = async(req,res)=>{
+    const { id } = req.params;
+    const { name, city } = req.body;
+
+    try{
+        if(!name || !city){
+            return res.status(400).json({ message: "All fields are required" });
+        }           
+        const existingZone = await zoneModel.findOne({ name, city, _id: { $ne: id } });
+        if(existingZone){
+            return res.status(400).json({ message: "Another zone with this name and city already exists" });
+        }
+        const updatedZone = await zoneModel.findByIdAndUpdate(id, { name, city }, { new: true });
+        if(!updatedZone){
+            return res.status(404).json({ message: "Zone not found" });
+        }
+        return res.status(200).json({ message: "Zone updated successfully", zone: updatedZone });
+    }catch(error){
+        return res.status(500).json({ message: "Error updating zone", error: error.message });
+    }
+}
+export const DeleteZone = async(req,res)=>{
+    const { id } = req.params;                  
+    try{    
+        const deletedZone = await zoneModel.findByIdAndDelete(id);
+        if(!deletedZone){
+            return res.status(404).json({ message: "Zone not found" });
+        }                   
+        return res.status(200).json({ message: "Zone deleted successfully" });
+    }       
+    catch(error){
+        return res.status(500).json({ message: "Error deleting zone", error: error.message });
+    }   
+}   
 
 export const Createcompany = async(req,res)=>{
     
@@ -74,7 +108,7 @@ export const getCompany = async(req,res)=>{
      const {name} = req.query;
 
      try{
-        // Agar name nahi hai, toh saari companies return karo (Dropdown ke liye)
+    
         if (!name) {
             const companies = await Company.find({}).populate('zoneIds', 'name city');
             return res.status(200).json({ companies });
@@ -90,3 +124,38 @@ export const getCompany = async(req,res)=>{
      }
 
 }
+
+export const UpdateCompany = async(req,res)=>{          
+    const { id } = req.params;
+    const { name, zoneIds } = req.body; 
+    try{        
+        if(!name || !zoneIds || !Array.isArray(zoneIds) || zoneIds.length === 0){
+            return res.status(400).json({ message: "Company Name and at least one Zone ID are required." });
+        }           
+        const existingCompany = await Company.findOne({ name, _id: { $ne: id } });
+        if(existingCompany){
+            return res.status(400).json({ message: "Another company with this name already exists" });
+        }
+        const updatedCompany = await Company.findByIdAndUpdate(id, { name, zoneIds }, { new: true });
+        if(!updatedCompany){
+            return res.status(404).json({ message: "Company not found" });
+        }   
+        return res.status(200).json({ message: "Company updated successfully", company: updatedCompany });
+    }catch(error){
+        return res.status(500).json({ message: "Error updating company", error: error.message });
+    }   
+}
+
+export const DeleteCompany = async(req,res)=>{          
+    const { id } = req.params;
+    try{    
+        const deletedCompany = await Company.findByIdAndDelete(id);
+        if(!deletedCompany){
+            return res.status(404).json({ message: "Company not found" });
+        }
+        return res.status(200).json({ message: "Company deleted successfully" });
+    }catch(error){
+        return res.status(500).json({ message: "Error deleting company", error: error.message });
+    }       
+}   
+
