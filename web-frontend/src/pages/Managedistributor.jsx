@@ -45,17 +45,22 @@ function Managedistributor() {
 
     return (
         <div className="flex h-screen bg-slate-50">
-            {/* Left Sidebar */}
-            <Sidebar />
-            
             <div className="flex flex-col flex-1 overflow-hidden">
                 {/* Top Navigation */}
                 <TopNavbar />
                 
                 <main className="flex-1 overflow-y-auto p-6">
+                    {/* Top Action Bar with Styled Back Button */}
+                    <div className="w-full mb-4">
+                        <button onClick={() => navigate('/dashboard')} className="flex items-center gap-2 text-slate-500 hover:text-blue-600 font-semibold transition-colors bg-white px-4 py-2 rounded-lg border border-slate-200 shadow-sm w-max">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                            Back to Dashboard
+                        </button>
+                    </div>
+
                     <div className="flex justify-between items-center mb-6">
                         <div>
-                            
+                            <h2 className="text-2xl font-extrabold text-slate-800">Manage Distributors</h2>
                             <p className="text-sm text-slate-500 mt-1 font-medium">View, update, or suspend distributor accounts.</p>
                         </div>
                     </div>

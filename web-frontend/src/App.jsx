@@ -10,6 +10,7 @@ import Chat from './component/Chat.jsx';
 import AddRep from './component/AddRep.jsx';
 import Addproduct from './component/Addproduct.jsx';
 import Managedistributor from './pages/Managedistributor.jsx';
+import Masterdatamanagement from './pages/Masterdatamanagement.jsx';
 
 import './App.css'
 
@@ -36,6 +37,7 @@ function App() {
        <Route path="/addrep" element={<AddRep />} />
         <Route path="/addproduct" element={<Addproduct />} />
         <Route path="/dashboard/distributors" element={<Managedistributor />} />
+        <Route path="/dashboard/master-data" element={<Masterdatamanagement />} />
       </Routes>
     </BrowserRouter>
   )

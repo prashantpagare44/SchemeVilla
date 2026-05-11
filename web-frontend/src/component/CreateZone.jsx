@@ -1,15 +1,28 @@
-import React from 'react'
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '../api/axiosConfig';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 function CreateZone()
 {
     const navigate = useNavigate();
+    const location = useLocation();
+    
+    const editData = location.state?.zoneData;
+    const [isEditing, setIsEditing] = useState(false);
+    const [editId, setEditId] = useState(null);
+
     const [zoneData, setZoneData] = useState({ name: '', city: '' });
     const [masterMessage, setMasterMessage] = useState({ zone: null, company: null });
     const [masterLoading, setMasterLoading] = useState({ zone: false, company: false });
     
+    useEffect(() => {
+        if (editData) {
+            setIsEditing(true);
+            setEditId(editData._id);
+            setZoneData({ name: editData.name || '', city: editData.city || '' });
+        }
+    }, [editData]);
+
     const handleZoneChange = (e) => setZoneData({ ...zoneData, [e.target.name]: e.target.value });
     
     const handleZoneSubmit = async (e) => {
@@ -17,9 +30,15 @@ function CreateZone()
         setMasterLoading(prev => ({ ...prev, zone: true }));
         setMasterMessage(prev => ({ ...prev, zone: null }));
         try {
-          const response = await api.post('/masterdata/zone', zoneData);
-          setMasterMessage(prev => ({ ...prev, zone: { type: 'success', text: response.data.message } }));
-          setZoneData({ name: '', city: '' }); 
+          let response;
+          if (isEditing) {
+              response = await api.put(`/masterdata/zone/${editId}`, zoneData);
+          } else {
+              response = await api.post('/masterdata/zone', zoneData);
+          }
+          
+          setMasterMessage(prev => ({ ...prev, zone: { type: 'success', text: response.data.message || `Zone ${isEditing ? 'updated' : 'created'} successfully!` } }));
+          if (!isEditing) setZoneData({ name: '', city: '' }); 
           
           // Redirect back to dashboard after 1.2 seconds on success
           setTimeout(() => {
@@ -27,7 +46,7 @@ function CreateZone()
           }, 1200);
 
         } catch (error) {
-          setMasterMessage(prev => ({ ...prev, zone: { type: 'error', text: error.response?.data?.message || 'Failed to create zone.' } }));
+          setMasterMessage(prev => ({ ...prev, zone: { type: 'error', text: error.response?.data?.message || `Failed to ${isEditing ? 'update' : 'create'} zone.` } }));
         } finally {
           setMasterLoading(prev => ({ ...prev, zone: false }));
         }
@@ -59,8 +78,8 @@ function CreateZone()
             <div className="w-full md:w-1/2 p-8 lg:p-12 flex flex-col justify-center">
               
               <div className="mb-8">
-                 <h3 className="text-2xl font-extrabold text-slate-800">Create New Zone</h3>
-                 <p className="text-slate-500 text-sm mt-1 font-medium">Add a new geographical area to the system.</p>
+                 <h3 className="text-2xl font-extrabold text-slate-800">{isEditing ? 'Update Zone' : 'Create New Zone'}</h3>
+                 <p className="text-slate-500 text-sm mt-1 font-medium">{isEditing ? 'Modify the details of the selected zone.' : 'Add a new geographical area to the system.'}</p>
               </div>
 
               {masterMessage.zone && (
@@ -83,8 +102,8 @@ function CreateZone()
                   <button type="button" onClick={() => navigate('/dashboard')} className="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold hover:bg-slate-50 transition-colors">
                     Cancel
                   </button>
-                  <button type="submit" disabled={masterLoading.zone} className="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors disabled:bg-blue-400 shadow-sm shadow-blue-200">
-                    {masterLoading.zone ? 'Creating...' : 'Create Zone'}
+                  <button type="submit" disabled={masterLoading.zone} className="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors disabled:bg-blue-400 disabled:opacity-60 shadow-sm shadow-blue-200">
+                    {masterLoading.zone ? (isEditing ? 'Updating...' : 'Creating...') : (isEditing ? 'Update Zone' : 'Create Zone')}
                   </button>
                 </div>
               </form>
