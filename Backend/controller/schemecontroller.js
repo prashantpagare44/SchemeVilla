@@ -4,42 +4,58 @@ import DistributorProfile from '../models/DISTRIBUTOR_MODEL.js';
 
 export const CreateScheme = async (req, res) => {
 
-    const{productName,schemeType,discount,terms,validFrom,expiryDate,zoneIds} = req.body;
+    let {productName, schemeType, discount, terms, validFrom, expiryDate, zoneIds} = req.body;
 
     try{
-         // 1. Array check aur discount check (0 allow karne ke liye)
-         if(!productName || !schemeType || discount === undefined || !validFrom || !expiryDate || !zoneIds || !Array.isArray(zoneIds) || zoneIds.length === 0){
-            return res.status(400).json({ message: "All required fields must be provided, and zoneIds must be a non-empty array" });
+        
+         if(!productName || !schemeType || discount === undefined || !validFrom || !expiryDate){
+            return res.status(400).json({ message: "All required fields must be provided" });
          }
 
-         // 2. Rep ka data fetch karo taaki zones verify kar sako
-         const repProfile = await RepProfile.findOne({ userId: req.user._id });
-         if (!repProfile) return res.status(404).json({ message: "Rep profile not found" });
+         let companyId = null;
+         let assignedRepId = null;
+         let schemeStatus = 'pending';
 
-         // 3. Zone Validation: Check karo ki rep apni limit se bahar scheme na banaye
-         const invalidZones = zoneIds.filter(id => !repProfile.zoneIds.some(repZone => repZone.toString() === id.toString()));
-         if (invalidZones.length > 0) {
-             return res.status(403).json({ message: "Access Denied: You can only create schemes for your assigned zones" });
-         }
-
-         // 4. Distributor ka profile fetch karke uski companyId nikalo
-         const distProfile = await DistributorProfile.findOne({ userId: repProfile.distributorId });
-         if (!distProfile || !distProfile.companyId) {
-              return res.status(400).json({ message: "Distributor company mapping not found" });
+         if (req.user.role === 'distributor') {
+             const distProfile = await DistributorProfile.findOne({ userId: req.user._id });
+             if (!distProfile) return res.status(404).json({ message: "Distributor profile not found" });
+             
+             companyId = distProfile.companyId;
+             schemeStatus = 'approved'; // Distributor dwara banai scheme direct approved hoti hai
+             zoneIds = (zoneIds && zoneIds.length > 0) ? zoneIds : distProfile.zoneIds; 
+         } 
+         else if (req.user.role === 'rep') {
+             const repProfile = await RepProfile.findOne({ userId: req.user._id });
+             if (!repProfile) return res.status(404).json({ message: "Rep profile not found" });
+             
+             if (!zoneIds || !Array.isArray(zoneIds) || zoneIds.length === 0) {
+                 return res.status(400).json({ message: "zoneIds must be a non-empty array for Reps" });
+             }
+             const invalidZones = zoneIds.filter(id => !repProfile.zoneIds.some(repZone => repZone.toString() === id.toString()));
+             if (invalidZones.length > 0) {
+                 return res.status(403).json({ message: "Access Denied: You can only create schemes for your assigned zones" });
+             }
+             
+             const distProfile = await DistributorProfile.findOne({ _id: repProfile.distributorId });
+             companyId = distProfile ? distProfile.companyId : null;
+             assignedRepId = req.user._id;
+         } else {
+             return res.status(403).json({ message: "Only distributors and reps can create schemes" });
          }
 
          const newScheme = await Scheme.create({
-            companyId: distProfile.companyId,
-            repId: req.user._id,
+            companyId,
+            repId: assignedRepId,
             productName,
             schemeType,
             discount,
             terms,
             validFrom,
             expiryDate,
-            zoneIds
+            zoneIds,
+            status: schemeStatus
             });
-         return res.status(201).json({ message: "Scheme created and pending approval", scheme: newScheme });
+         return res.status(201).json({ message: `Scheme created successfully`, scheme: newScheme });
     }catch(error)
     {
         return res.status(500).json({ message: "Error creating scheme", error: error.message });

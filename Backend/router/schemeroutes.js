@@ -7,7 +7,7 @@ const router = express.Router();
 
 
 
-router.post('/create-scheme', protect, authorizeRoles('rep'), CreateScheme);
+router.post('/create-scheme', protect, authorizeRoles('rep','distributor'), CreateScheme);
 
 
 router.put('/update-status', protect, authorizeRoles('distributor'), updateSchemeStatus);

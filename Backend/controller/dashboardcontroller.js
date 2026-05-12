@@ -7,27 +7,27 @@ export const getDashboardStats = async (req, res) => {
         const { role, _id } = req.user;
         const distributorId = role === 'distributor' ? new mongoose.Types.ObjectId(_id) : null;
 
-        // Base match filter, jo role ke hisaab se data filter karega
+        
         const matchFilter = {};
         if (distributorId) {
             matchFilter.distributorId = distributorId;
         }
 
-        // 1. Total Sales aur Order Counts
+        
         const salesData = await Order.aggregate([
             { $match: matchFilter },
             {
                 $group: {
-                    _id: null, // Saare documents ko ek group mein daalo
+                    _id: null, 
                     totalSales: { $sum: '$totalAmount' },
                     totalOrders: { $sum: 1 },
                 }
             }
         ]);
 
-        // 2. Total Udhaar (Outstanding Amount)
+    
         const outstandingData = await RetailerProfile.aggregate([
-            { $match: matchFilter }, // Retailer profile mein bhi distributorId hai
+            { $match: matchFilter }, 
             {
                 $group: {
                     _id: null,
@@ -36,10 +36,10 @@ export const getDashboardStats = async (req, res) => {
             }
         ]);
 
-        // 3. Top 5 Selling Products (Quantity ke hisaab se)
+    
         const topProducts = await Order.aggregate([
             { $match: matchFilter },
-            { $unwind: '$products' }, // products array ko alag-alag documents mein todo
+            { $unwind: '$products' }, 
             {
                 $group: {
                     _id: '$products.productId',
@@ -47,11 +47,11 @@ export const getDashboardStats = async (req, res) => {
                     totalQuantitySold: { $sum: '$products.quantity' }
                 }
             },
-            { $sort: { totalQuantitySold: -1 } }, // Sabse zyada bikne wale upar
+            { $sort: { totalQuantitySold: -1 } }, 
             { $limit: 5 }
         ]);
 
-        // 4. Top 5 Performing Reps (Sales Amount ke hisaab se)
+        
         const topReps = await Order.aggregate([
             { $match: matchFilter },
             {
@@ -64,7 +64,7 @@ export const getDashboardStats = async (req, res) => {
             { $sort: { totalSales: -1 } },
             { $limit: 5 },
             {
-                $lookup: { // 'users' collection se Rep ka naam join karo
+                $lookup: { 
                     from: 'users',
                     localField: '_id',
                     foreignField: '_id',
@@ -73,7 +73,7 @@ export const getDashboardStats = async (req, res) => {
             },
             { $unwind: '$repInfo' },
             {
-                $project: { // Sirf zaroori data return karo
+                $project: { 
                     _id: 0,
                     repId: '$_id',
                     repName: '$repInfo.name',
@@ -83,7 +83,7 @@ export const getDashboardStats = async (req, res) => {
             }
         ]);
 
-        // Saare stats ko ek object mein daal kar bhejo
+        
         const stats = {
             totalSales: salesData.length > 0 ? salesData[0].totalSales : 0,
             totalOrders: salesData.length > 0 ? salesData[0].totalOrders : 0,
