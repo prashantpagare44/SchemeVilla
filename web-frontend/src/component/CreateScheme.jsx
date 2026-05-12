@@ -8,7 +8,7 @@ function CreateScheme() {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         productName: '',
-        schemeType: 'Percentage Discount',
+        schemeType: 'flat', // Default value
         discount: '',
         terms: '',
         validFrom: '',
@@ -78,14 +78,25 @@ function CreateScheme() {
                                     <input type="text" name="productName" value={formData.productName} onChange={handleChange} required className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 focus:bg-white transition-colors" placeholder="e.g. Parle-G 100g" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-semibold text-slate-700 mb-1">Discount Percentage (%)</label>
-                                    <input type="number" name="discount" value={formData.discount} onChange={handleChange} required className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 focus:bg-white transition-colors" placeholder="e.g. 10" />
+                                    <label className="block text-sm font-semibold text-slate-700 mb-1">Scheme Type</label>
+                                    <select name="schemeType" value={formData.schemeType} onChange={handleChange} required className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 focus:bg-white transition-colors">
+                                        <option value="flat">Flat Discount (₹)</option>
+                                        <option value="slab">Slab Based</option>
+                                        <option value="combo">Combo Offer</option>
+                                        <option value="free">Free Item</option>
+                                    </select>
                                 </div>
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1">Terms & Conditions</label>
-                                <textarea name="terms" value={formData.terms} onChange={handleChange} required rows="2" className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 focus:bg-white transition-colors" placeholder="Enter scheme terms..."></textarea>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-1">Scheme Value / Discount</label>
+                                    <input type="number" name="discount" value={formData.discount} onChange={handleChange} required className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 focus:bg-white transition-colors" placeholder="e.g. 10" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-1">Terms & Conditions</label>
+                                    <input type="text" name="terms" value={formData.terms} onChange={handleChange} required className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 focus:bg-white transition-colors" placeholder="Enter scheme terms..." />
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
