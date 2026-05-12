@@ -14,6 +14,7 @@ export const CreateScheme = async (req, res) => {
 
          let companyId = null;
          let assignedRepId = null;
+         let distributorId = null;
          let schemeStatus = 'pending';
 
          if (req.user.role === 'distributor') {
@@ -21,7 +22,9 @@ export const CreateScheme = async (req, res) => {
              if (!distProfile) return res.status(404).json({ message: "Distributor profile not found" });
              
              companyId = distProfile.companyId;
-             schemeStatus = 'approved'; // Distributor dwara banai scheme direct approved hoti hai
+             assignedRepId = req.user._id; 
+             distributorId = distProfile._id;
+             schemeStatus = 'approved'; 
              zoneIds = (zoneIds && zoneIds.length > 0) ? zoneIds : distProfile.zoneIds; 
          } 
          else if (req.user.role === 'rep') {
@@ -39,12 +42,14 @@ export const CreateScheme = async (req, res) => {
              const distProfile = await DistributorProfile.findOne({ _id: repProfile.distributorId });
              companyId = distProfile ? distProfile.companyId : null;
              assignedRepId = req.user._id;
+             distributorId = repProfile.distributorId;
          } else {
              return res.status(403).json({ message: "Only distributors and reps can create schemes" });
          }
 
          const newScheme = await Scheme.create({
             companyId,
+            distributorId,
             repId: assignedRepId,
             productName,
             schemeType,

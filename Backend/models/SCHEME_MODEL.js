@@ -2,7 +2,8 @@ import mongoose from 'mongoose';
 
 const schemeSchema = new mongoose.Schema({
     companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true },
-    repId: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true }, // Rep who created it
+    distributorId: { type: mongoose.Schema.Types.ObjectId, ref: 'DistributorProfile', required: true },
+    repId: { type: mongoose.Schema.Types.ObjectId, ref: 'user' }, // Rep who created it (can be null if distributor creates)
     
     productName: { type: String, required: true },
     schemeType: { 
