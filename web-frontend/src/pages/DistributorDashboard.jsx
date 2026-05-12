@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import api from '../../api/axiosConfig';
-import TopNavbar from '../../component/TopNavbar';
-import Sidebar from '../../component/Sidebar';
+import api from '../api/axiosConfig';
+import TopNavbar from '../component/TopNavbar';
+import Sidebar from '../component/Sidebar'; 
 import { useNavigate } from 'react-router-dom';
 
-
-function Distributor() {
+function DistributorDashboard() {
     const navigate = useNavigate();
     const [stats, setStats] = useState({
         totalSales: 0,
@@ -16,20 +15,13 @@ function Distributor() {
     });
     const [loading, setLoading] = useState(true);
 
-    // Backend se Dashboard ke Stats Fetch karna
+    
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                // Admin ki tarah same '/dashboard' route use karenge
-                const response = await api.get('/dashboard');
-                if (response.data.success && response.data.data) {
-                    setStats({
-                        totalSales: response.data.data.totalSales || 0,
-                        totalOrders: response.data.data.totalOrders || 0,
-                        totalOutstanding: response.data.data.totalOutstanding || 0,
-                        topProducts: response.data.data.topProducts || [],
-                        topReps: response.data.data.topReps || []
-                    });
+                const response = await api.get('/dashboard/stats');
+                if (response.data.success) {
+                    setStats(response.data.data);
                 }
             } catch (error) {
                 console.error("Error fetching dashboard stats:", error);
@@ -40,8 +32,9 @@ function Distributor() {
         fetchStats();
     }, []);
 
-  return (
+    return (
         <div className="flex h-screen bg-slate-50">
+            
             <Sidebar />
 
             <div className="flex flex-col flex-1 overflow-hidden">
@@ -51,14 +44,14 @@ function Distributor() {
                     {/* Page Header & Quick Actions */}
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                         <div>
-                            {/* <h2 className="text-3xl font-extrabold text-slate-800">Distributor Overview</h2 */}
+                            {/* <h2 className="text-3xl font-extrabold text-slate-800">Distributor Overview</h2> */}
                             <p className="text-sm text-slate-500 mt-1 font-medium">Welcome back! Here is what's happening in your distribution network today.</p>
                         </div>
                         <div className="flex gap-3">
                             <button onClick={() => navigate('/dashboard/schemes')} className="px-4 py-2 bg-blue-600 border border-slate-200 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm">
                                 + Create Scheme
                             </button>
-                            <button onClick={() => navigate('/dashboard/reps')} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm shadow-blue-200">
+                            <button onClick={() => navigate('/addrep')} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm shadow-blue-200">
                                 + Onboard Rep
                             </button>
                         </div>
@@ -70,8 +63,9 @@ function Distributor() {
                         </div>
                     ) : (
                         <>
-                            
+            
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                            
                                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
                                     <div>
                                         <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">Total Sales</p>
@@ -82,6 +76,7 @@ function Distributor() {
                                     </div>
                                 </div>
 
+                    
                                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
                                     <div>
                                         <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">Total Orders</p>
@@ -92,6 +87,7 @@ function Distributor() {
                                     </div>
                                 </div>
 
+                                
                                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
                                     <div>
                                         <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">Market Dues (Udhaar)</p>
@@ -103,9 +99,10 @@ function Distributor() {
                                 </div>
                             </div>
 
-                            {/* 📈 TABLES ROW */}
+                            
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                 
+                        
                                 <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
                                     <div className="p-6 border-b border-slate-100 bg-slate-50/50">
                                         <h3 className="text-lg font-bold text-slate-800">Top Selling Products</h3>
@@ -126,6 +123,7 @@ function Distributor() {
                                     </div>
                                 </div>
 
+                                
                                 <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
                                     <div className="p-6 border-b border-slate-100 bg-slate-50/50">
                                         <h3 className="text-lg font-bold text-slate-800">Top Performing Reps</h3>
@@ -158,4 +156,4 @@ function Distributor() {
     );
 }
 
-export default Distributor;
+export default DistributorDashboard;

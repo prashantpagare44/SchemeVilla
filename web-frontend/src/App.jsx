@@ -11,6 +11,8 @@ import AddRep from './component/AddRep.jsx';
 import Addproduct from './component/Addproduct.jsx';
 import Managedistributor from './pages/Managedistributor.jsx';
 import Masterdatamanagement from './pages/Masterdatamanagement.jsx';
+import CreateScheme from './component/CreateScheme.jsx';
+import DistributorDashboard from './pages/DistributorDashboard.jsx';
 
 import './App.css'
 
@@ -38,6 +40,7 @@ function App() {
         <Route path="/addproduct" element={<Addproduct />} />
         <Route path="/dashboard/distributors" element={<Managedistributor />} />
         <Route path="/dashboard/master-data" element={<Masterdatamanagement />} />
+        <Route path="/dashboard/schemes" element={<CreateScheme />} />
       </Routes>
     </BrowserRouter>
   )

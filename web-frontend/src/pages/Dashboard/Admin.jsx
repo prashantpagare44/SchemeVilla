@@ -118,8 +118,8 @@ const addProduct = () => {
               <p className="text-sm text-slate-500">Welcome back, here's what's happening today.</p>
             </div>
             <div className="flex gap-3">
-              <button onClick={addProduct}   className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors shadow-sm">
-                Add Product
+              <button onClick={addProduct}   className="px-4 py-2 bg-blue-600 border border-slate-200 text-white rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors shadow-sm">
+                + Add Product
               </button>
               <button onClick = {addDistributor} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm shadow-blue-200">
                 + New Distributor
