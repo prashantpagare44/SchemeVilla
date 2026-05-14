@@ -117,3 +117,45 @@ export const getSchemes = async (req, res) => {
         return res.status(500).json({ message: "Error fetching schemes", error: error.message });
     }
 }
+
+export const updateScheme = async (req, res) => {
+    try {
+        const schemeId = req.params.id;
+        const updatedScheme = await Scheme.findByIdAndUpdate(schemeId, req.body, { new: true });
+        if (!updatedScheme) return res.status(404).json({ message: "Scheme not found" });
+        
+        return res.status(200).json({ message: "Scheme updated successfully", scheme: updatedScheme });
+    } catch (error) {
+        return res.status(500).json({ message: "Error updating scheme", error: error.message });
+    }
+}
+
+export const deleteScheme = async (req, res) => {
+    try {
+        const schemeId = req.params.id;
+        const deletedScheme = await Scheme.findByIdAndDelete(schemeId);
+        if (!deletedScheme) return res.status(404).json({ message: "Scheme not found" });
+        
+        return res.status(200).json({ message: "Scheme deleted successfully" });
+    } catch (error) {
+        return res.status(500).json({ message: "Error deleting scheme", error: error.message });
+    }
+}
+
+export const updateSchemeStatus = async (req, res) => {
+    try {
+        const schemeId = req.params.id;
+        const { status } = req.body;
+        
+        const scheme = await Scheme.findById(schemeId);
+        if (!scheme) return res.status(404).json({ message: "Scheme not found" });
+
+        scheme.status = status;
+        if (status === 'approved') scheme.approvedBy = req.user._id; // Kisne approve ki, save kar lo
+
+        await scheme.save();
+        return res.status(200).json({ message: `Scheme ${status} successfully`, scheme });
+    } catch (error) {
+        return res.status(500).json({ message: "Error updating status", error: error.message });
+    }
+}
