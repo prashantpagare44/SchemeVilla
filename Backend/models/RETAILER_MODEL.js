@@ -3,13 +3,13 @@ import mongoose from 'mongoose';
 const retailerSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'user', // Isko bhi lowercase 'user' kar dein baaki models ki tarah
         required: true
     },
     shopName: String,
-    distributorId: mongoose.Schema.Types.ObjectId,
-    zone: mongoose.Schema.Types.ObjectId,
-    createdByRep: mongoose.Schema.Types.ObjectId,
+    distributorId: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
+    zone: { type: mongoose.Schema.Types.ObjectId, ref: 'Zone' },
+    createdByRep: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
     outstandingAmount: { type: Number, default: 0 },
     
     status: { type: String, enum: ['pending', 'active', 'rejected'], default: 'active' },

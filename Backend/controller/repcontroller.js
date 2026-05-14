@@ -84,6 +84,9 @@ export const verifyAndCreateRetailer = async (req, res) => {
 
 export const getRetailers = async (req, res) => {
     try {
+          if (!req.user) {
+            return res.status(401).json({ message: "Session expired. Please login again." });
+        }
         let filter = {}; 
 
         if (req.user.role === 'distributor') {
@@ -101,7 +104,7 @@ export const getRetailers = async (req, res) => {
             }
         }
         const retailers = await RetailerProfile.find(filter)
-            .populate('userId', 'phone isActive createdAt')
+            .populate('userId', 'name phone isActive createdAt')
             .populate('createdByRep', 'name phone')         
             .sort({ createdAt: -1 });                       
 

@@ -44,18 +44,18 @@ const seedData = async () => {
         const company = await Company.create({ name: "Raju Traders", distributorId: distributor._id, zoneIds: [zone._id] });
         await DistributorProfile.create({ userId: distributor._id, companyId: company._id, zoneIds: [zone._id] });
 
-        // 4. Create Rep
+        
         const rep = await User.create({ name: "Amit Sales Rep", phone: "9990000002", role: "rep" });
         await RepProfile.create({ userId: rep._id, distributorId: distributor._id, zoneIds: [zone._id] });
 
-        // 5. Create Retailer
+    
         const retailer = await User.create({ name: "Rahul Kirana", phone: "9990000003", role: "retailer" });
         await RetailerProfile.create({ userId: retailer._id, shopName: "Rahul Kirana Store", distributorId: distributor._id, zone: zone._id, createdByRep: rep._id });
 
-        // 6. Create Product
+
         const product = await Product.create({ name: "Parle-G 100g", sku: "PARLE100", price: 10, distributorId: distributor._id, stock: 500 });
 
-        // 7. Create Dummy Orders
+
         console.log("Creating Dummy Orders...");
         await Order.create({
             retailerId: retailer._id,
