@@ -140,7 +140,7 @@ export const Rep = async (req, res) => {
             return res.status(400).json({ message: "Invalid phone number. Must be exactly 10 digits." });
         }
 
-        // ID validation: Check if companyId and zoneIds are valid MongoDB ObjectIDs
+    
         if (!mongoose.Types.ObjectId.isValid(companyId)) {
             return res.status(400).json({ message: "Invalid Company ID format. Must be a 24-character MongoDB ID." });
         }
@@ -161,7 +161,7 @@ export const Rep = async (req, res) => {
             return res.status(400).json({ message: "User with this phone already exists" });
         }
 
-        // Create Rep in DB
+        
         const newRep = await User.create({ name, phone, password, role: 'rep' }); // Password add kiya
         const profile = await RepProfile.create({ userId: newRep._id, distributorId, zoneIds });
 
