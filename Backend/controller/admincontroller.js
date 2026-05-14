@@ -128,8 +128,15 @@ export const getReps = async (req, res) => {
 
 export const Rep = async (req, res) => {
     try {
-        const { name, phone, password, companyId, zoneIds, distributorId } = req.body;
+        let { name, phone, password, companyId, zoneIds, distributorId } = req.body;
 
+        // Agar distributor khud Rep bana raha hai, toh ID backend se auto-fill karenge
+        if (req.user.role === 'distributor') {
+            distributorId = req.user._id;
+            const distProfile = await DistributorProfile.findOne({ userId: req.user._id });
+            if (!distProfile) return res.status(404).json({ message: "Distributor profile not found" });
+            companyId = distProfile.companyId;
+        }
         
         if (!name || !phone || !companyId || !zoneIds || !Array.isArray(zoneIds) || zoneIds.length === 0 || !distributorId) {
             return res.status(400).json({ message: "All fields are required, and zoneIds must be a non-empty array" });
