@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 function AddProduct() {
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -56,12 +57,18 @@ function AddProduct() {
     setLoading(true);
     setMessage({ type: '', text: '' });
 
+    // Agar user distributor hai, toh uski localStorage wali ID payload me daal do
+    const payload = {
+      ...formData,
+      distributorId: user.role === 'distributor' ? user.id : formData.distributorId
+    };
+
     try {
       if (isEditing) {
-        await api.put(`/products/update-product/${editId}`, formData);
+        await api.put(`/products/update-product/${editId}`, payload);
         setMessage({ type: 'success', text: 'Product updated successfully!' });
       } else {
-        await api.post('/products/create-product', formData);
+        await api.post('/products/create-product', payload);
         setMessage({ type: 'success', text: 'Product created successfully!' });
       }
 
@@ -173,15 +180,17 @@ function AddProduct() {
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Price (₹)</label>
                 <input type="number" min="0" step="0.01" name="price" value={formData.price} onChange={handleChange} required className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 focus:bg-white transition-colors" placeholder="0.00" />
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Assign Distributor</label>
-                <select name="distributorId" value={formData.distributorId} onChange={handleChange} required className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 focus:bg-white transition-colors">
-                  <option value="">-- Select Distributor --</option>
-                  {distributors.map(d => (
-                    <option key={d._id} value={d.userId?._id}>{d.userId?.name || 'Unknown'} - {d.companyId?.name}</option>
-                  ))}
-                </select>
-              </div>
+              {user.role !== 'distributor' && (
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Assign Distributor</label>
+                  <select name="distributorId" value={formData.distributorId} onChange={handleChange} required className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 focus:bg-white transition-colors">
+                    <option value="">-- Select Distributor --</option>
+                    {distributors.map(d => (
+                      <option key={d._id} value={d.userId?._id}>{d.userId?.name || 'Unknown'} - {d.companyId?.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
             
 

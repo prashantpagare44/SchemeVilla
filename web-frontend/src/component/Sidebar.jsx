@@ -12,7 +12,7 @@ const MENU_ITEMS = {
         { name: 'Inventory', path: '/dashboard/inventory' },
         { name: 'Orders', path: '/dashboard/orders' },
         { name: 'Schemes', path: '/dashboard/schemes' },
-        { name: 'My Reps', path: '/dashboard/reps' },
+        { name: 'My Reps', path: '/manage-reps' },
     ],
     rep: [
         { name: 'Overview', path: '/dashboard' },

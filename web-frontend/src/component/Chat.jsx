@@ -8,12 +8,22 @@ function Chat() {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const navigate = useNavigate();
 
+  // Dynamic Initial Welcome Message based on Role
+  let initialText = `Hello ${user.name || 'User'}! 👋 I am your System Command Assistant. `;
+  if (user.role === 'distributor') {
+      initialText += 'I can help you track your inventory, pending orders, sales, and market dues.';
+  } else if (user.role === 'rep') {
+      initialText += 'I can help you track your sales, pending orders, and available schemes.';
+  } else {
+      initialText += 'I can help you monitor active distributors, track master data, and provide system-wide insights.';
+  }
+
   // State to manage chat messages
   const [messages, setMessages] = useState([
     {
       id: 1,
       sender: 'ai',
-      text: `Hello ${user.name || 'Admin'}! 👋 I am your System Command Assistant. I can help you monitor active distributors, track master data, and provide system-wide insights. What would you like to know today?`
+      text: initialText
     }
   ]);
   
@@ -21,12 +31,28 @@ function Chat() {
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
 
-  // Suggested automatic queries for Admin
-  const suggestedQueries = [
-    "How many active distributors?",
-    "How many reps do we have?",
-    "How many zones are registered?"
-  ];
+  // Dynamic Suggested Queries based on Role
+  let suggestedQueries = [];
+  if (user.role === 'distributor') {
+      suggestedQueries = [
+          "How many pending orders do I have?",
+          "Check my low stock items",
+          "What are my total sales and dues?",
+          "How many reps are in my team?"
+      ];
+  } else if (user.role === 'rep') {
+      suggestedQueries = [
+          "How many pending orders do I have?",
+          "What are my total sales?",
+          "Show available schemes"
+      ];
+  } else {
+      suggestedQueries = [
+          "How many active distributors?",
+          "How many reps do we have?",
+          "How many zones are registered?"
+      ];
+  }
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -45,32 +71,55 @@ function Chat() {
     setIsTyping(true); // Show typing indicator
 
     try {
-      let aiResponse = "I am still learning! Right now I can pull real-time data for zones, companies, distributors, reps, and sales. Try asking me!";
+      let aiResponse = "I am still learning! Please ask me about orders, stock, reps, sales, or distributors.";
       const lowerInput = messageText.toLowerCase();
 
-    
-      if (lowerInput.includes('zone')) {
+      // ----- ADMIN SPECIFIC QUERIES -----
+      if (lowerInput.includes('zone') && user.role === 'admin') {
         const res = await api.get('/masterdata/zone');
         const count = res.data.zones ? res.data.zones.length : 0;
         aiResponse = `Real-time Data: We currently have ${count} active zones configured in the database.`;
-      } else if (lowerInput.includes('company') || lowerInput.includes('companies')) {
+      } else if ((lowerInput.includes('company') || lowerInput.includes('companies')) && user.role === 'admin') {
         const res = await api.get('/masterdata/company');
         const count = res.data.companies ? res.data.companies.length : 0;
         aiResponse = `Real-time Data: There are ${count} onboarded companies in the database right now.`;
-      } else if (lowerInput.includes('distributor') || lowerInput.includes('active')) {
+      } else if (lowerInput.includes('distributor') && user.role === 'admin') {
         const res = await api.get('/admin/distributors'); 
         const count = res.data.data ? res.data.data.length : 0;
         aiResponse = `Real-time Data: We currently have ${count} active distributors registered in the system.`;
-      } else if (lowerInput.includes('rep') || lowerInput.includes('representative')) {
+      } 
+      
+      // ----- DISTRIBUTOR & ADMIN QUERIES -----
+      else if ((lowerInput.includes('rep') || lowerInput.includes('team') || lowerInput.includes('representative')) && (user.role === 'distributor' || user.role === 'admin')) {
         const res = await api.get('/admin/reps'); 
         const count = res.data.data ? res.data.data.length : 0;
-        aiResponse = `Real-time Data: There are ${count} sales representatives currently operating.`;
-      } else if (lowerInput.includes('sales') || lowerInput.includes('revenue') || lowerInput.includes('order')) {
+        aiResponse = `Team Update: There are ${count} sales representatives operating ${user.role === 'distributor' ? 'under your network' : 'in the system'}.`;
+      } else if ((lowerInput.includes('stock') || lowerInput.includes('inventory') || lowerInput.includes('low')) && user.role === 'distributor') {
+        const res = await api.get('/products/get-products');
+        const products = res.data.data || [];
+        const lowStockProducts = products.filter(p => p.stock <= 50);
+        aiResponse = `Inventory Update: You have ${products.length} products in your catalog. ${lowStockProducts.length > 0 ? `⚠️ Alert: ${lowStockProducts.length} products are running low on stock (<= 50 units).` : 'All products have sufficient stock levels.'}`;
+      } 
+      
+      // ----- UNIVERSAL QUERIES (Distributor & Rep) -----
+      else if (lowerInput.includes('order') || lowerInput.includes('pending')) {
+        const res = await api.get('/orders');
+        const orders = res.data.data || [];
+        const pendingOrders = orders.filter(o => o.status === 'pending');
+        aiResponse = `Order Status: You have ${orders.length} total orders. ${pendingOrders.length > 0 ? `Action Required: ${pendingOrders.length} orders are currently PENDING.` : 'Great job! No pending orders right now.'}`;
+      } else if (lowerInput.includes('sales') || lowerInput.includes('revenue') || lowerInput.includes('due') || lowerInput.includes('udhaar')) {
+        const res = await api.get('/orders');
         const orders = res.data.data || [];
         const totalSales = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
-        aiResponse = `Real-time Data: The system-wide total revenue is ₹${totalSales.toLocaleString('en-IN')} from ${orders.length} orders.`;
+        const creditOrders = orders.filter(o => o.orderType === 'credit');
+        const totalDues = creditOrders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+        aiResponse = `Financial Update: Total sales volume is ₹${totalSales.toLocaleString('en-IN')} from ${orders.length} orders. ${user.role === 'distributor' ? `🔴 Total market dues (Udhaar/Credit) are ₹${totalDues.toLocaleString('en-IN')}.` : ''}`;
+      } else if (lowerInput.includes('scheme') || lowerInput.includes('offer')) {
+        const res = await api.get('/schemes/get-schemes');
+        const schemes = res.data.data || [];
+        aiResponse = `Promotions: There are currently ${schemes.length} active schemes/offers available for your network.`;
       } else if (lowerInput.includes('hello') || lowerInput.includes('hi')) {
-        aiResponse = "Hello! I am connected to the live database. You can ask me about zones, companies, distributors, reps, or sales/revenue!";
+        aiResponse = `Hello! I am connected to the live database. You can ask me about ${user.role === 'distributor' ? 'your stock, pending orders, sales, reps, or dues!' : user.role === 'rep' ? 'your orders, sales, and available schemes!' : 'zones, companies, distributors, reps, or system revenue!'}`;
       }
 
     

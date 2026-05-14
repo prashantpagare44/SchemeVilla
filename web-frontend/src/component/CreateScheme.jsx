@@ -1,14 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '../api/axiosConfig';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import TopNavbar from './TopNavbar';
 
 function CreateScheme() {
     const navigate = useNavigate();
+    const location = useLocation();
+    
+    const editData = location.state?.schemeData;
+    const [isEditing, setIsEditing] = useState(false);
+    const [editId, setEditId] = useState(null);
+
     const [formData, setFormData] = useState({
         productName: '',
-        schemeType: 'flat', // Default value
+        schemeType: 'flat', 
         discount: '',
         terms: '',
         validFrom: '',
@@ -17,6 +23,22 @@ function CreateScheme() {
     });
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
+
+    useEffect(() => {
+        if (editData) {
+            setIsEditing(true);
+            setEditId(editData._id);
+            setFormData({
+                productName: editData.productName,
+                schemeType: editData.schemeType,
+                discount: editData.discount,
+                terms: editData.terms || '',
+                validFrom: new Date(editData.validFrom).toISOString().split('T')[0],
+                expiryDate: new Date(editData.expiryDate).toISOString().split('T')[0],
+                zoneIds: editData.zoneIds || []
+            });
+        }
+    }, [editData]);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -28,11 +50,15 @@ function CreateScheme() {
         setMessage({ type: '', text: '' });
 
         try {
-            
-            await api.post('/schemes/create-scheme', { ...formData, discount: Number(formData.discount) });
-            setMessage({ type: 'success', text: 'Scheme successfully created!' });
+            if (isEditing) {
+                await api.put(`/schemes/update-scheme/${editId}`, { ...formData, discount: Number(formData.discount) });
+                setMessage({ type: 'success', text: 'Scheme successfully updated!' });
+            } else {
+                await api.post('/schemes/create-scheme', { ...formData, discount: Number(formData.discount) });
+                setMessage({ type: 'success', text: 'Scheme successfully created!' });
+            }
             setTimeout(() => {
-                navigate('/dashboard');
+                navigate('/dashboard/schemes');
             }, 1500);
         } catch (error) {
             setMessage({
@@ -46,10 +72,10 @@ function CreateScheme() {
 
     return (
         <div className="flex h-screen bg-slate-50">
-            <Sidebar />
+            
             
             <div className="flex flex-col flex-1 overflow-hidden">
-                <TopNavbar />
+                
                 
                 <main className="flex-1 overflow-y-auto p-6 lg:p-8">
                     <div className="w-full mb-6">
@@ -61,8 +87,8 @@ function CreateScheme() {
 
                     <div className="bg-white rounded-3xl shadow-sm border border-slate-100 w-full max-w-4xl mx-auto p-8 lg:p-10">
                         <div className="mb-8">
-                            <h2 className="text-2xl font-extrabold text-slate-800">Create New Scheme</h2>
-                            <p className="text-sm text-slate-500 mt-1 font-medium">Design promotional offers and targets for your retailers to boost sales.</p>
+                            <h2 className="text-2xl font-extrabold text-slate-800">{isEditing ? 'Update Scheme' : 'Create New Scheme'}</h2>
+                            <p className="text-sm text-slate-500 mt-1 font-medium">{isEditing ? 'Modify promotional details.' : 'Design promotional offers and targets for your retailers to boost sales.'}</p>
                         </div>
 
                         {message.text && (
@@ -112,7 +138,7 @@ function CreateScheme() {
 
                             <div className="flex justify-end pt-4">
                                 <button type="submit" disabled={loading} className="px-8 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors disabled:bg-blue-400 disabled:opacity-60 shadow-sm shadow-blue-200">
-                                    {loading ? 'Creating Scheme...' : 'Create Scheme'}
+                                    {loading ? 'Saving...' : isEditing ? 'Update Scheme' : 'Create Scheme'}
                                 </button> 
                             </div>
                         </form>
