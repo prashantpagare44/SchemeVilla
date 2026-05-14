@@ -1,5 +1,5 @@
 import express from 'express';
-import { Distributor, Rep ,getDistributor , getReps, updateDistributor, suspendDistributor } from '../controller/admincontroller.js';
+import { Distributor, Rep ,getDistributor , getReps, updateDistributor, suspendDistributor, updateRep, suspendRep } from '../controller/admincontroller.js';
 import { protect, authorizeRoles } from '../middleware/authMiddleware.js';
 
 
@@ -11,5 +11,7 @@ router.put('/suspend-distributor/:id', protect, authorizeRoles('admin'), suspend
 router.post('/create-rep', protect, authorizeRoles('admin','distributor'), Rep);
 router.get('/distributors', protect, authorizeRoles('admin'), getDistributor);
 router.get('/reps', protect, authorizeRoles('admin', 'distributor'), getReps);  
+router.put('/update-rep/:id', protect, authorizeRoles('admin', 'distributor'), updateRep);
+router.put('/suspend-rep/:id', protect, authorizeRoles('admin', 'distributor'), suspendRep);
 
 export default router;

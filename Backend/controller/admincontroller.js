@@ -122,7 +122,7 @@ export const getReps = async (req, res) => {
         }
 
         const reps = await RepProfile.find(filter)
-            .populate('userId', 'name phone role')
+            .populate('userId', 'name phone role isActive')
             .populate('distributorId', 'name phone')
             .populate('zoneIds', 'name city');
         return res.status(200).json({ success: true, count: reps.length, data: reps });
@@ -180,5 +180,61 @@ export const Rep = async (req, res) => {
         return res.status(201).json({ message: "Sales Rep created successfully", user: newRep, profile });
     } catch (error) {
         return res.status(500).json({ message: "Error creating rep", error: error.message });
+    }
+}
+
+export const updateRep = async (req, res) => {
+    try {
+        const repId = req.params.id;
+        const { name, phone, password, zoneIds } = req.body;
+
+        const profile = await RepProfile.findById(repId);
+        if (!profile) return res.status(404).json({ message: "Rep profile not found" });
+
+        
+        if (req.user.role === 'distributor' && profile.distributorId.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: "Access Denied: You can only update your own reps" });
+        }
+
+        const user = await User.findById(profile.userId);
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        if (phone && phone !== user.phone) {
+            const existingUser = await User.findOne({ phone });
+            if (existingUser) return res.status(400).json({ message: "Phone number already in use by another user" });
+            user.phone = phone;
+        }
+
+        if (name) user.name = name;
+        if (password) user.password = password; 
+
+        await user.save();
+
+        if (zoneIds && Array.isArray(zoneIds)) profile.zoneIds = zoneIds;
+        await profile.save();
+
+        return res.status(200).json({ message: "Rep updated successfully", user, profile });
+    } catch(error) {
+        return res.status(500).json({ message: "Error updating rep", error: error.message });
+    }
+}
+
+export const suspendRep = async (req, res) => {
+    try {
+        const repId = req.params.id;
+        const profile = await RepProfile.findById(repId);
+        if (!profile) return res.status(404).json({ message: "Rep profile not found" });
+
+        if (req.user.role === 'distributor' && profile.distributorId.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: "Access Denied" });
+        }
+
+        const user = await User.findById(profile.userId);
+        user.isActive = user.isActive === false ? true : false;
+        await user.save();
+
+        return res.status(200).json({ message: `Sales Rep ${user.isActive ? 'activated' : 'suspended'} successfully` });
+    } catch (error) {
+        return res.status(500).json({ message: "Error suspending rep", error: error.message });
     }
 }
