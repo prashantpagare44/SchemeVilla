@@ -6,7 +6,7 @@ import { authorizeRoles } from '../middleware/authMiddleware.js';
 const router = express.Router();
 
 router.post('/zone', protect, authorizeRoles('admin'), CreateZone);
-router.get('/zone', protect, authorizeRoles('admin'), getZone);
+router.get('/zone', protect, authorizeRoles('admin','distributor'), getZone);
 router.post('/company', protect, authorizeRoles('admin'), Createcompany);
 router.get('/company', getCompany);
 router.put('/zone/:id', protect, authorizeRoles('admin'), UpdateZone);
