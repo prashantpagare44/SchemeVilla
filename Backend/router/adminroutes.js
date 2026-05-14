@@ -10,6 +10,6 @@ router.put('/update-distributor/:id', protect, authorizeRoles('admin'), updateDi
 router.put('/suspend-distributor/:id', protect, authorizeRoles('admin'), suspendDistributor);
 router.post('/create-rep', protect, authorizeRoles('admin','distributor'), Rep);
 router.get('/distributors', protect, authorizeRoles('admin'), getDistributor);
-router.get('/reps', protect, authorizeRoles('admin'), getReps);  
+router.get('/reps', protect, authorizeRoles('admin', 'distributor'), getReps);  
 
 export default router;

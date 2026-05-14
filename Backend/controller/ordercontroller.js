@@ -137,6 +137,10 @@ export const receiveOrder = async (req,res)=>{
 
 export const getOrders = async (req, res) => {
     try {
+        if (!req.user) {
+            return res.status(401).json({ message: "User session expired or not found. Please login again." });
+        }
+
         let filter = {};
 
         

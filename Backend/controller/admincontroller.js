@@ -116,7 +116,12 @@ export const suspendDistributor = async (req, res) => {
 
 export const getReps = async (req, res) => {
     try {
-        const reps = await RepProfile.find()
+        let filter = {};
+        if (req.user.role === 'distributor') {
+            filter = { distributorId: req.user._id };
+        }
+
+        const reps = await RepProfile.find(filter)
             .populate('userId', 'name phone role')
             .populate('distributorId', 'name phone')
             .populate('zoneIds', 'name city');
