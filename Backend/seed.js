@@ -10,6 +10,7 @@ import DistributorProfile from './models/DISTRIBUTOR_MODEL.js';
 import RepProfile from './models/REP_MODEL.js';
 import RetailerProfile from './models/RETAILER_MODEL.js';
 import Product from './models/PRODUCT_MODEL.js';
+import Order from './models/ORDER_MODEL.js';
 
 
 const generateToken = (user) => jwt.sign({ id: user._id, phone: user.phone, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
@@ -19,7 +20,16 @@ const seedData = async () => {
         await connectDB();
         console.log("Database connected. Clearing old test data...");
 
-        await Promise.all([User.deleteMany(), Zone.deleteMany(), Company.deleteMany(), DistributorProfile.deleteMany(), RepProfile.deleteMany(), RetailerProfile.deleteMany(), Product.deleteMany()]);
+        await Promise.all([
+            User.deleteMany(), 
+            Zone.deleteMany(), 
+            Company.deleteMany(), 
+            DistributorProfile.deleteMany(), 
+            RepProfile.deleteMany(), 
+            RetailerProfile.deleteMany(), 
+            Product.deleteMany(),
+            Order.deleteMany()
+        ]);
 
         console.log("Creating Seed Data...");
 
@@ -44,6 +54,38 @@ const seedData = async () => {
 
         // 6. Create Product
         const product = await Product.create({ name: "Parle-G 100g", sku: "PARLE100", price: 10, distributorId: distributor._id, stock: 500 });
+
+        // 7. Create Dummy Orders
+        console.log("Creating Dummy Orders...");
+        await Order.create({
+            retailerId: retailer._id,
+            distributorId: distributor._id,
+            repId: rep._id,
+            products: [{
+                productId: product._id,
+                name: product.name,
+                quantity: 10,
+                price: product.price
+            }],
+            totalAmount: 100, // 10 * 10
+            orderType: 'upfront',
+            status: 'pending'
+        });
+
+        await Order.create({
+            retailerId: retailer._id,
+            distributorId: distributor._id,
+            repId: rep._id,
+            products: [{
+                productId: product._id,
+                name: product.name,
+                quantity: 50,
+                price: product.price
+            }],
+            totalAmount: 500, // 50 * 10
+            orderType: 'credit',
+            status: 'delivered'
+        });
 
         console.log("--------------------------------------------------");
         console.log("✅ SEEDING SUCCESSFUL! Postman mein test karne ke liye ye Tokens use karein:");

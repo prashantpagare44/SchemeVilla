@@ -104,7 +104,7 @@ export const suspendDistributor = async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
-        // Status toggle karna (Suspend hai toh Active, Active hai toh Suspend)
+    
         user.isActive = user.isActive === false ? true : false;
         await user.save();
 
@@ -130,7 +130,7 @@ export const Rep = async (req, res) => {
     try {
         let { name, phone, password, companyId, zoneIds, distributorId } = req.body;
 
-        // Agar distributor khud Rep bana raha hai, toh ID backend se auto-fill karenge
+        
         if (req.user.role === 'distributor') {
             distributorId = req.user._id;
             const distProfile = await DistributorProfile.findOne({ userId: req.user._id });
@@ -155,7 +155,7 @@ export const Rep = async (req, res) => {
             return res.status(400).json({ message: "Invalid Zone ID format. Must be a 24-character MongoDB ID." });
         }
 
-        // ID validation
+        
         if (!mongoose.Types.ObjectId.isValid(companyId) || !mongoose.Types.ObjectId.isValid(distributorId)) {
             return res.status(400).json({ message: "Invalid Company or Distributor ID format." });
         }
