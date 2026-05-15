@@ -37,7 +37,7 @@ export const sendRetailerOtp = async (req, res) => {
 
         return res.status(200).json({ message: "OTP sent to retailer successfully" });
     } catch (error) {
-        return res.status(500).json({ message: "Error sending OTP", error: error.message });
+        return res.status(500).json({ message: error.message || "Error sending OTP" });
     }
 };
 
@@ -78,7 +78,7 @@ export const verifyAndCreateRetailer = async (req, res) => {
             return res.status(400).json({ message: "Invalid OTP" });
         }
     } catch (error) {
-        return res.status(500).json({ message: "Error verifying retailer", error: error.message });
+        return res.status(500).json({ message: error.message || "Error verifying retailer" });
     }
 };
 
@@ -116,5 +116,56 @@ export const getRetailers = async (req, res) => {
 
     } catch (error) {
         return res.status(500).json({ message: "Error fetching retailers", error: error.message });
+    }
+};
+
+export const updateRetailer = async (req, res) => {
+    try {
+        const retailerId = req.params.id;
+        const { shopName, phone, zoneId } = req.body;
+
+        const profile = await RetailerProfile.findById(retailerId);
+        if (!profile) return res.status(404).json({ message: "Retailer not found" });
+
+        // Security Check: Rep can only update their own retailers
+        if (req.user.role === 'rep' && profile.createdByRep.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: "Access Denied: You can only update your own retailers" });
+        }
+
+        if (shopName) profile.shopName = shopName;
+        if (zoneId) profile.zone = zoneId;
+        await profile.save();
+
+        const user = await User.findById(profile.userId);
+        if (user && phone && phone !== user.phone) {
+            const existing = await User.findOne({ phone });
+            if (existing) return res.status(400).json({ message: "Phone number already in use" });
+            user.phone = phone;
+            await user.save();
+        }
+
+        return res.status(200).json({ message: "Retailer updated successfully", profile });
+    } catch (error) {
+        return res.status(500).json({ message: error.message || "Error updating retailer" });
+    }
+};
+
+export const deleteRetailer = async (req, res) => {
+    try {
+        const retailerId = req.params.id;
+        const profile = await RetailerProfile.findById(retailerId);
+        if (!profile) return res.status(404).json({ message: "Retailer not found" });
+
+        // Security Check: Rep can only delete their own retailers
+        if (req.user.role === 'rep' && profile.createdByRep.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: "Access Denied: You can only delete your own retailers" });
+        }
+
+        await User.findByIdAndDelete(profile.userId);
+        await RetailerProfile.findByIdAndDelete(retailerId);
+
+        return res.status(200).json({ message: "Retailer deleted successfully" });
+    } catch (error) {
+        return res.status(500).json({ message: error.message || "Error deleting retailer" });
     }
 };
