@@ -10,6 +10,7 @@ function Admin() {
   const [isMounted, setIsMounted] = useState(false);
   const [dashboardData, setDashboardData] = useState(null);
   const [distributorCount, setDistributorCount] = useState(0);
+  const [orders, setOrders] = useState([]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -17,12 +18,14 @@ function Admin() {
     // Backend se real-time dashboard data fetch karna
     const fetchDashboardData = async () => {
       try {
-        const [statsRes, distRes] = await Promise.all([
+        const [statsRes, distRes, ordersRes] = await Promise.all([
           api.get('/dashboard'),
-          api.get('/admin/distributors')
+          api.get('/admin/distributors'),
+          api.get('/orders')
         ]);
         if (statsRes.data.success) setDashboardData(statsRes.data.data);
         if (distRes.data.success) setDistributorCount(distRes.data.count);
+        if (ordersRes.data.success) setOrders(ordersRes.data.data || []);
       } catch (error) {
         console.error("Error fetching dashboard data", error);
       }
@@ -54,42 +57,48 @@ function Admin() {
   ];
 
 
-  const topProductsData = [
-    { name: 'Product A', quantity: 120 },
-    { name: 'Product B', quantity: 98 },
-    { name: 'Product C', quantity: 86 },
-    { name: 'Product D', quantity: 50 },
-    { name: 'Product E', quantity: 30 },
-  ];
+  const topProductsData = dashboardData?.topProducts?.length > 0 
+    ? dashboardData.topProducts.map(prod => ({ name: prod.name, quantity: prod.totalQuantitySold }))
+    : [{ name: 'No Data', quantity: 0 }];
 
-  const topRepsData = [
-    { name: 'Rahul', sales: 50000 },
-    { name: 'Amit', sales: 42000 },
-    { name: 'Suresh', sales: 30000 },
-    { name: 'Vikas', sales: 24000 },
-  ];
+  const topRepsData = dashboardData?.topReps?.length > 0
+    ? dashboardData.topReps.map(rep => ({ name: rep.repName, sales: rep.totalSales }))
+    : [{ name: 'No Data', sales: 0 }];
 
   // Pie chart colors
   const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
   // Naya Data: Sales Trend (Line Chart)
-  const salesTrendData = [
-    { name: 'Mon', sales: 4000 },
-    { name: 'Tue', sales: 3000 },
-    { name: 'Wed', sales: 5000 },
-    { name: 'Thu', sales: 2780 },
-    { name: 'Fri', sales: 8900 },
-    { name: 'Sat', sales: 4390 },
-    { name: 'Sun', sales: 6490 },
-  ];
+  const getSalesTrendData = () => {
+    const trend = [];
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      trend.push({ name: days[d.getDay()], dateStr: d.toDateString(), sales: 0 });
+    }
+
+    orders.forEach(order => {
+      const orderDate = new Date(order.createdAt).toDateString();
+      const trendDay = trend.find(t => t.dateStr === orderDate);
+      if (trendDay) {
+        trendDay.sales += order.totalAmount || 0;
+      }
+    });
+
+    return trend;
+  };
+  const salesTrendData = getSalesTrendData();
 
   // Naya Data: Recent Orders Table
-  const recentOrders = [
-    { id: '#ORD-001', retailer: 'Sharma General Store', amount: '₹ 12,500', status: 'Delivered', date: 'Today, 10:30 AM' },
-    { id: '#ORD-002', retailer: 'Gupta Traders', amount: '₹ 8,200', status: 'Pending', date: 'Today, 09:15 AM' },
-    { id: '#ORD-003', retailer: 'Verma Mart', amount: '₹ 24,000', status: 'Dispatched', date: 'Yesterday' },
-    { id: '#ORD-004', retailer: 'A-Z Supermarket', amount: '₹ 5,600', status: 'Delivered', date: 'Yesterday' },
-  ];
+  const recentOrders = orders.slice(0, 5).map(order => ({
+    id: `#${order._id.substring(order._id.length - 6).toUpperCase()}`,
+    retailer: order.retailerId?.phone || order.retailerId?.name || 'Retailer Info',
+    amount: `₹ ${order.totalAmount}`,
+    status: order.status || 'pending',
+    date: new Date(order.createdAt).toLocaleDateString('en-IN')
+  }));
   const navigate = useNavigate();
 const addDistributor = async(req,res)=>{
     navigate('/adddistributor');
@@ -218,7 +227,7 @@ const addProduct = () => {
           <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
             <div className="p-6 border-b border-slate-100 flex justify-between items-center">
               <h3 className="text-lg font-bold text-slate-800">Recent Orders</h3>
-              <button className="text-sm font-semibold text-blue-600 hover:text-blue-800">View All</button>
+              <button onClick={() => navigate('/dashboard/orders')} className="text-sm font-semibold text-blue-600 hover:text-blue-800">View All</button>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
@@ -232,29 +241,32 @@ const addProduct = () => {
                   </tr>
                 </thead>
                 <tbody className="text-sm text-slate-700">
-                  {recentOrders.map((order, index) => (
+                  {recentOrders.length > 0 ? recentOrders.map((order, index) => (
                     <tr key={index} className="hover:bg-slate-50/50 transition-colors border-b border-slate-50 last:border-none">
                       <td className="p-4 font-medium text-slate-900">{order.id}</td>
                       <td className="p-4">{order.retailer}</td>
                       <td className="p-4 text-slate-500">{order.date}</td>
                       <td className="p-4 font-bold">{order.amount}</td>
                       <td className="p-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                          order.status === 'Delivered' ? 'bg-green-100 text-green-700' :
-                          order.status === 'Pending' ? 'bg-orange-100 text-orange-700' :
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                          order.status.toLowerCase() === 'delivered' ? 'bg-green-100 text-green-700' :
+                          order.status.toLowerCase() === 'pending' ? 'bg-orange-100 text-orange-700' :
+                          order.status.toLowerCase() === 'cancelled' ? 'bg-red-100 text-red-700' :
                           'bg-blue-100 text-blue-700'
                         }`}>
                           {order.status}
                         </span>
                       </td>
                     </tr>
-                  ))}
+                  )) : (
+                    <tr><td colSpan="5" className="p-8 text-center text-slate-500 font-medium">No orders found.</td></tr>
+                  )}
                 </tbody>
               </table>
             </div>
           </div>
 
-          {/* Master Data Management Section */}
+          
       
         
             

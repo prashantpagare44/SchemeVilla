@@ -5,6 +5,9 @@ const MENU_ITEMS = {
     admin: [
         { name: 'Overview', path: '/dashboard' },
         { name: 'Manage Distributors', path: '/dashboard/distributors' },
+        { name: 'Sales Reps', path: '/manage-reps' },
+        { name: 'Companies', path: '/dashboard/companies' },
+        { name: 'Products', path: '/dashboard/products' },
         { name: 'Master Data', path: '/dashboard/master-data' },
     ],
     distributor: [
@@ -18,12 +21,14 @@ const MENU_ITEMS = {
     rep: [
         { name: 'Overview', path: '/dashboard' },
         { name: 'My Retailers', path: '/dashboard/retailers' },
+        { name: 'Receive Payment', path: '/dashboard/receive-payment' },
         { name: 'Create Order', path: '/dashboard/create-order' },
         { name: 'Propose Scheme', path: '/dashboard/propose-scheme' },
     ],
     retailer: [
         { name: 'Overview', path: '/dashboard' },
         { name: 'My Orders', path: '/dashboard/my-orders' },
+        { name: 'My Payments', path: '/dashboard/my-payments' },
         { name: 'Available Schemes', path: '/dashboard/available-schemes' },
     ]
 };

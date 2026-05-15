@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from '../component/Sidebar';
 import TopNavbar from '../component/TopNavbar';
 import api from '../api/axiosConfig';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 function Managedistributor() {
     const [distributors, setDistributors] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+    const location = useLocation();
 
     const fetchDistributors = async () => {
         try {
@@ -43,6 +44,15 @@ function Managedistributor() {
         }
     };
 
+    // Search Filter Logic
+    const queryParams = new URLSearchParams(location.search);
+    const searchTerm = queryParams.get('search')?.toLowerCase() || '';
+
+    const filteredDistributors = distributors.filter(d => 
+        (d.userId?.name || '').toLowerCase().includes(searchTerm) ||
+        (d.companyId?.name || '').toLowerCase().includes(searchTerm)
+    );
+
     return (
         <div className="flex h-screen bg-slate-50">
             <div className="flex flex-col flex-1 overflow-hidden">
@@ -68,7 +78,7 @@ function Managedistributor() {
                     <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
                         <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                             <h3 className="text-lg font-bold text-slate-800">All Distributors</h3>
-                            <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">{distributors.length} Total</span>
+                            <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">{filteredDistributors.length} Total</span>
                         </div>
 
                         <div className="overflow-x-auto">
@@ -85,7 +95,7 @@ function Managedistributor() {
                                 <tbody className="text-sm text-slate-700">
                                     {loading ? (
                                         <tr><td colSpan="5" className="p-8 text-center text-slate-500 font-medium">Loading distributors...</td></tr>
-                                    ) : distributors.length > 0 ? distributors.map((d) => (
+                                    ) : filteredDistributors.length > 0 ? filteredDistributors.map((d) => (
                                         <tr key={d._id} className="hover:bg-slate-50/70 transition-colors border-b border-slate-100 last:border-none">
                                             <td className="p-4">
                                                 <p className="font-bold text-slate-900">{d.userId?.name || 'N/A'}</p>

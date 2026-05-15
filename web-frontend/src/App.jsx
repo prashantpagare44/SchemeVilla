@@ -21,6 +21,14 @@ import Inventory from './component/Inventory.jsx';
 import MyRetailers from './component/MyRetailers.jsx';
 import Createorder from './component/Createorder.jsx';
   import ProposeScheme from './component/ProposeScheme.jsx';
+import AddRetailer from './component/AddRetailer.jsx';
+import Myorder from './component/Myorder.jsx';
+import ReceivePayment from './pages/Dashboard/ReceivePayment.jsx';
+import MyPayments from './component/MyPayments.jsx';
+import AvailableSchemes from './component/AvailableSchemes.jsx';
+import ManageCompanies from './component/ManageCompanies.jsx';
+import ManageProducts from './component/ManageProducts.jsx';
+import Explore from './pages/Explore.jsx';
 
 import './App.css'
 
@@ -57,6 +65,16 @@ function App() {
        <Route path="/dashboard/retailers" element={<MyRetailers />} />
        <Route path="/dashboard/create-order" element={<Createorder />} />
        <Route path="/dashboard/propose-scheme" element={<ProposeScheme />} />
+       <Route path="/create-retailer" element={<AddRetailer />} />
+       <Route path="/dashboard/my-orders" element={<Myorder />} />
+       <Route path="/dashboard/receive-payment" element={<ReceivePayment />} />
+       <Route path="/dashboard/my-payments" element={<MyPayments />} />
+       <Route path="/dashboard/available-schemes" element={<AvailableSchemes />} />
+       <Route path="/dashboard/companies" element={<ManageCompanies />} />
+       <Route path="/dashboard/products" element={<ManageProducts />} />
+       <Route path="/dashboard/explore" element={<Explore />} />
+
+       
 
 
       </Routes>

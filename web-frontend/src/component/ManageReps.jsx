@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 function ManageReps() {
     const navigate = useNavigate();
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
     
     const [reps, setReps] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -26,7 +27,11 @@ function ManageReps() {
     }, []); 
 
     const handleEdit = (rep) => {
-        navigate('/dashboard/reps', { state: { repData: rep } });
+        if (user.role === 'admin') {
+            navigate('/addrep', { state: { repData: rep } });
+        } else {
+            navigate('/dashboard/reps', { state: { repData: rep } });
+        }
     };
 
     const handleSuspend = async (rep) => {
@@ -45,7 +50,7 @@ function ManageReps() {
 
     return (
         <div className="flex h-screen bg-slate-50">
-            <Sidebar />
+        
             <div className="flex flex-col flex-1 overflow-hidden">
                 <TopNavbar />
                 <main className="flex-1 overflow-y-auto p-6 lg:p-8">
@@ -61,10 +66,12 @@ function ManageReps() {
                 
                     <div className="mb-6 flex justify-between items-end">
                         <div>
-                            {/* <h2 className="text-2xl font-extrabold text-slate-800">My Sales Reps</h2> */}
-                            <p className="text-sm text-slate-500 mt-1 font-medium">View and manage all the sales representatives working under you.</p>
+                            <h2 className="text-2xl font-extrabold text-slate-800">Sales Representatives</h2>
+                            <p className="text-sm text-slate-500 mt-1 font-medium">
+                                {user.role === 'admin' ? 'View and manage all sales representatives across the entire system.' : 'View and manage all the sales representatives working under you.'}
+                            </p>
                         </div>
-                        <button onClick={() => navigate('/dashboard/reps')} className="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-sm shadow-blue-200">
+                        <button onClick={() => navigate(user.role === 'admin' ? '/addrep' : '/dashboard/reps')} className="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-sm shadow-blue-200">
                             + Add New Rep
                         </button>
                     </div>

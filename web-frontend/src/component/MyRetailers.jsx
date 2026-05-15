@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 function MyRetailers() {
     const navigate = useNavigate();
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
     
     const [retailers, setRetailers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -25,6 +26,16 @@ function MyRetailers() {
         fetchRetailers(); 
     }, []); 
 
+    const handleDelete = async (id) => {
+        if (!window.confirm("Are you sure you want to delete this retailer?")) return;
+        try {
+            await api.delete(`/retailers/delete-retailer/${id}`);
+            setRetailers(retailers.filter(r => r._id !== id));
+        } catch (error) {
+            alert(error.response?.data?.message || "Error deleting retailer");
+        }
+    };
+
     return (
         <div className="flex h-screen bg-slate-50">
             
@@ -39,11 +50,18 @@ function MyRetailers() {
                         </button>
                     </div>
 
-                    <div className="mb-6">
-                        <h2 className="text-2xl font-extrabold text-slate-800">My Retailers</h2>
-                        <p className="text-sm text-slate-500 mt-1 font-medium">View your entire network of retailers and track their outstanding dues.</p>
+                    <div className="mb-6 flex justify-between items-end">
+                        <div>
+                            <h2 className="text-2xl font-extrabold text-slate-800">My Retailers</h2>
+                            <p className="text-sm text-slate-500 mt-1 font-medium">View your entire network of retailers and track their outstanding dues.</p>
+                        </div>
+                        {user.role === 'rep' && (
+                            <button onClick={() => navigate('/create-retailer')} className="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-sm shadow-blue-200">
+                                + Add New Retailer
+                            </button>
+                        )}
                     </div>
-                    
+
                     <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
                         <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                             <h3 className="text-lg font-bold text-slate-800">Retailer Network</h3>
@@ -58,6 +76,7 @@ function MyRetailers() {
                                         <th className="p-4 font-semibold">Owner / Phone</th>
                                         <th className="p-4 font-semibold">Zone</th>
                                         <th className="p-4 font-semibold text-right">Outstanding Dues</th>
+                                        <th className="p-4 font-semibold text-right">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="text-sm text-slate-700">
@@ -77,10 +96,16 @@ function MyRetailers() {
                                                         ₹{retailer.outstandingAmount || 0}
                                                     </span>
                                                 </td>
+                                                <td className="p-4 text-right">
+                                                    <div className="flex justify-end gap-3 items-center">
+                                                        <button onClick={() => navigate('/create-retailer', { state: { retailerData: retailer } })} className="text-blue-600 hover:text-blue-800 font-bold text-xs transition-colors">Edit</button>
+                                                        <button onClick={() => handleDelete(retailer._id)} className="text-red-500 hover:text-red-700 font-bold text-xs transition-colors">Delete</button>
+                                                    </div>
+                                                </td>
                                             </tr>
                                         ))
                                     ) : (
-                                        <tr><td colSpan="4" className="p-8 text-center text-slate-500">No Retailers found.</td></tr>
+                                        <tr><td colSpan="5" className="p-8 text-center text-slate-500">No Retailers found.</td></tr>
                                     )}
                                 </tbody>
                             </table>

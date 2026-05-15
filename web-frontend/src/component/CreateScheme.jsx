@@ -12,6 +12,30 @@ function CreateScheme() {
     const [isEditing, setIsEditing] = useState(false);
     const [editId, setEditId] = useState(null);
 
+    // Helper object for dynamic form fields (Same as Rep's ProposeScheme)
+    const schemeFieldConfig = {
+        flat: {
+            label: 'Flat Discount (₹)',
+            placeholder: 'e.g., 50',
+            helpText: 'Enter the exact discount amount in Rupees.'
+        },
+        slab: {
+            label: 'Discount Value',
+            placeholder: 'e.g., 10',
+            helpText: "Enter discount value. Describe slab (e.g., 'On purchase of 10 units') in Terms field."
+        },
+        combo: {
+            label: 'Combo Offer Discount (₹)',
+            placeholder: 'e.g., 100',
+            helpText: "Enter total discount. Describe combo (e.g., 'Product A + Product B') in Terms field."
+        },
+        free: {
+            label: 'Quantity of Free Item',
+            placeholder: 'e.g., 1',
+            helpText: "Enter the number of free units. Describe condition (e.g., 'On purchase of 5 units') in Terms field."
+        }
+    };
+
     const [formData, setFormData] = useState({
         productName: '',
         schemeType: 'flat', 
@@ -23,6 +47,20 @@ function CreateScheme() {
     });
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
+    const [products, setProducts] = useState([]);
+
+    // Fetch existing products to show in suggestions
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const response = await api.get('/products/get-products');
+                setProducts(response.data.data || []);
+            } catch (error) {
+                console.error("Error fetching products:", error);
+            }
+        };
+        fetchProducts();
+    }, []);
 
     useEffect(() => {
         if (editData) {
@@ -101,7 +139,12 @@ function CreateScheme() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label className="block text-sm font-semibold text-slate-700 mb-1">Product Name</label>
-                                    <input type="text" name="productName" value={formData.productName} onChange={handleChange} required className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 focus:bg-white transition-colors" placeholder="e.g. Parle-G 100g" />
+                                    <input type="text" name="productName" list="product-list" value={formData.productName} onChange={handleChange} required className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 focus:bg-white transition-colors" placeholder="e.g. Parle-G 100g" />
+                                    <datalist id="product-list">
+                                        {products.map(p => (
+                                            <option key={p._id} value={p.name} />
+                                        ))}
+                                    </datalist>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-semibold text-slate-700 mb-1">Scheme Type</label>
@@ -116,8 +159,11 @@ function CreateScheme() {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label className="block text-sm font-semibold text-slate-700 mb-1">Scheme Value / Discount</label>
-                                    <input type="number" name="discount" value={formData.discount} onChange={handleChange} required className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 focus:bg-white transition-colors" placeholder="e.g. 10" />
+                                    <label className="block text-sm font-semibold text-slate-700 mb-1">
+                                        {schemeFieldConfig[formData.schemeType]?.label || 'Scheme Value / Discount'}
+                                    </label>
+                                    <input type="number" min="1" name="discount" value={formData.discount} onChange={handleChange} required className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 focus:bg-white transition-colors" placeholder={schemeFieldConfig[formData.schemeType]?.placeholder || "e.g. 10"} />
+                                    <p className="text-xs text-slate-500 mt-1.5 px-1">{schemeFieldConfig[formData.schemeType]?.helpText}</p>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-semibold text-slate-700 mb-1">Terms & Conditions</label>

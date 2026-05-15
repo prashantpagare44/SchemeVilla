@@ -5,6 +5,7 @@ const TopNavbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   
+
   // Get user details from localStorage
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
@@ -28,8 +29,16 @@ const chat = ()=>{
       if(path.includes('create-order')) return 'Create Order';
       if(path.includes('propose-scheme')) return 'Propose Scheme';
       if(path.includes('distributors')) return 'Manage Distributors';
+      if(path.includes('companies')) return 'Manage Companies';
+      if(path.includes('products')) return 'Manage Products';
       return 'Dashboard';
   };
+
+  // Dynamic Explore Button Logic
+  const handleExplore = () => {
+      navigate('/dashboard/explore')
+  };
+
 
   return (
     <header className="w-full h-20 bg-white border-b border-slate-100 px-8 flex items-center justify-between sticky top-0 z-40 shrink-0">
@@ -41,26 +50,23 @@ const chat = ()=>{
       </div>
 
 
-      <div className="flex-1 max-w-md hidden md:block mx-4">
-        <div className="relative group">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <svg className="w-5 h-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+      <div className="flex-1 hidden md:flex items-center justify-center mx-4">
+          <div className="flex items-center gap-3 px-5 py-2.5 bg-slate-50 border border-slate-100 rounded-full shadow-inner">
+              <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+              </span>
+              <span className="text-sm font-semibold text-slate-600 tracking-wide flex items-center">
+                  System  <span className="text-slate-300 mx-3">|</span> {new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' })}
+              </span>
           </div>
-          <input
-            type="text"
-            className="block w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-transparent rounded-full text-sm placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-200 focus:ring-4 focus:ring-blue-50 transition-all font-medium"
-            placeholder="Search trades, orders or inventory..."
-          />
-        </div>
       </div>
 
       
       <div className="flex items-center gap-2">
         
     
-        <button className="hidden lg:flex items-center gap-2 px-5 py-2.5 rounded-full text-slate-600 hover:bg-slate-50 font-semibold text-sm transition-all">
+        <button onClick={handleExplore} className="hidden lg:flex items-center gap-2 px-5 py-2.5 rounded-full text-slate-600 hover:bg-slate-50 font-semibold text-sm transition-all">
           <span className="text-lg">✨</span>
           <span>Explore</span>
         </button>

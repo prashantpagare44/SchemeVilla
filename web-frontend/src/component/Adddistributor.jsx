@@ -50,7 +50,7 @@ function Adddistributor() {
           api.get('/masterdata/company'), 
           api.get('/masterdata/zone')
         ]);
-        setCompanies(compRes.data.companies || []);
+        setCompanies(compRes.data.companies || compRes.data.data || compRes.data || []);
         setZones(zoneRes.data.zones || []);
       } catch (error) {
         console.error("Error fetching master data:", error);

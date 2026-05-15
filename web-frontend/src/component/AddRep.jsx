@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api/axiosConfig'; 
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 function AddRep() {
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  const editData = location.state?.repData;
+  const [isEditing, setIsEditing] = useState(false);
+  const [editId, setEditId] = useState(null);
   
   // Form ke data ka state
   const [formData, setFormData] = useState({
@@ -32,7 +37,7 @@ function AddRep() {
           api.get('/masterdata/zone'),
           api.get('/admin/distributors')
         ]);
-        setCompanies(compRes.data.companies || []);
+        setCompanies(compRes.data.companies || compRes.data.data || compRes.data || []);
         setZones(zoneRes.data.zones || []);
         setDistributors(distRes.data.data || []);
       } catch (error) {
@@ -41,6 +46,21 @@ function AddRep() {
     };
     fetchMasterData();
   }, []);
+
+  useEffect(() => {
+    if (editData) {
+        setIsEditing(true);
+        setEditId(editData._id);
+        setFormData({
+            name: editData.userId?.name || '',
+            phone: editData.userId?.phone || '',
+            password: '', // Kept empty for security
+            companyId: editData.companyId?._id || editData.companyId || '',
+            zoneIds: editData.zoneIds?.[0]?._id || editData.zoneIds?.[0] || '',
+            distributorId: editData.distributorId?._id || editData.distributorId || ''
+        });
+    }
+  }, [editData]);
   
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -55,24 +75,28 @@ function AddRep() {
       const payload = {
         name: formData.name,
         phone: formData.phone,
-        password: formData.password,
         companyId: formData.companyId,
         zoneIds: [formData.zoneIds], // Backend needs an array
         distributorId: formData.distributorId
       };
+      if (formData.password) payload.password = formData.password;
 
-      const response = await api.post('/admin/create-rep', payload);
-      
-      setMessage({ type: 'success', text: 'Sales Rep successfully added!' });
+      if (isEditing) {
+          await api.put(`/admin/update-rep/${editId}`, payload);
+          setMessage({ type: 'success', text: 'Sales Rep successfully updated!' });
+      } else {
+          await api.post('/admin/create-rep', payload);
+          setMessage({ type: 'success', text: 'Sales Rep successfully added!' });
+      }
       
       setTimeout(() => {
-        navigate('/dashboard');
+        navigate('/manage-reps');
       }, 1500);
 
     } catch (error) {
       setMessage({ 
         type: 'error', 
-        text: error.response?.data?.message || 'Error adding Sales Rep. Please try again.' 
+        text: error.response?.data?.message || `Error ${isEditing ? 'updating' : 'adding'} Sales Rep. Please try again.` 
       });
     } finally {
       setLoading(false);
@@ -86,8 +110,8 @@ function AddRep() {
         {/* Left Side: Create Sales Rep Form */}
         <div className="w-full md:w-1/2 p-8 lg:p-12 flex flex-col justify-center">
           <div className="mb-8">
-            <h3 className="text-2xl font-extrabold text-slate-800">Add New Sales Rep</h3>
-            <p className="text-slate-500 text-sm mt-1 font-medium">Onboard a new sales representative to the field.</p>
+            <h3 className="text-2xl font-extrabold text-slate-800">{isEditing ? 'Update Sales Rep' : 'Add New Sales Rep'}</h3>
+            <p className="text-slate-500 text-sm mt-1 font-medium">{isEditing ? 'Modify the details of the selected sales representative.' : 'Onboard a new sales representative to the field.'}</p>
           </div>
 
           {message.text && (
@@ -127,15 +151,15 @@ function AddRep() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Password</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">{isEditing ? 'New Password (Optional)' : 'Password'}</label>
                 <input 
                   type="password" 
                   name="password" 
                   value={formData.password} 
                   onChange={handleChange} 
-                  required 
+                  required={!isEditing}
                   className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 focus:bg-white transition-colors"
-                  placeholder="Create a password"
+                  placeholder={isEditing ? 'Leave blank to keep same' : 'Create a password'}
                 />
               </div>
               <div>
@@ -177,7 +201,7 @@ function AddRep() {
                 Cancel
               </button>
               <button type="submit" disabled={loading} className="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors disabled:bg-blue-400 disabled:opacity-60 shadow-sm shadow-blue-200">
-                {loading ? 'Creating...' : 'Create Sales Rep'}
+                {loading ? (isEditing ? 'Updating...' : 'Creating...') : (isEditing ? 'Update Sales Rep' : 'Create Sales Rep')}
               </button>
             </div>
           </form>
