@@ -39,7 +39,7 @@ export const CreateScheme = async (req, res) => {
                  return res.status(403).json({ message: "Access Denied: You can only create schemes for your assigned zones" });
              }
              
-             const distProfile = await DistributorProfile.findOne({ _id: repProfile.distributorId });
+             const distProfile = await DistributorProfile.findOne({ userId: repProfile.distributorId });
              companyId = distProfile ? distProfile.companyId : null;
              assignedRepId = req.user._id;
              distributorId = repProfile.distributorId;
