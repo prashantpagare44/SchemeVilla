@@ -106,6 +106,7 @@ export const getRetailers = async (req, res) => {
         const retailers = await RetailerProfile.find(filter)
             .populate('userId', 'name phone isActive createdAt')
             .populate('createdByRep', 'name phone')         
+            .populate('zone', 'name city')
             .sort({ createdAt: -1 });                       
 
         return res.status(200).json({ 
@@ -127,7 +128,7 @@ export const updateRetailer = async (req, res) => {
         const profile = await RetailerProfile.findById(retailerId);
         if (!profile) return res.status(404).json({ message: "Retailer not found" });
 
-        // Security Check: Rep can only update their own retailers
+        
         if (req.user.role === 'rep' && profile.createdByRep.toString() !== req.user._id.toString()) {
             return res.status(403).json({ message: "Access Denied: You can only update your own retailers" });
         }
