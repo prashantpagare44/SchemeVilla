@@ -18,6 +18,9 @@ import Reponboard from './component/Reponboard.jsx';
 import Manageorder from './component/Manageorder.jsx'
 import ManageReps from './component/ManageReps.jsx';
 import Inventory from './component/Inventory.jsx';
+import MyRetailers from './component/MyRetailers.jsx';
+import Createorder from './component/Createorder.jsx';
+  import ProposeScheme from './component/ProposeScheme.jsx';
 
 import './App.css'
 
@@ -51,6 +54,10 @@ function App() {
        <Route path="/dashboard/orders" element={<Manageorder/>}/>
        <Route path="/manage-reps" element={<ManageReps />} />
        <Route path="/dashboard/inventory" element={<Inventory />} />
+       <Route path="/dashboard/retailers" element={<MyRetailers />} />
+       <Route path="/dashboard/create-order" element={<Createorder />} />
+       <Route path="/dashboard/propose-scheme" element={<ProposeScheme />} />
+
 
       </Routes>
     </BrowserRouter>

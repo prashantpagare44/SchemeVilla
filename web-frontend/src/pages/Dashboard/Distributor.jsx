@@ -94,7 +94,7 @@ function Distributor() {
 
                                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
                                     <div>
-                                        <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">Market Dues (Udhaar)</p>
+                                        <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">Market Dues </p>
                                         <h3 className="text-3xl font-black text-red-600">₹{stats.totalOutstanding.toLocaleString()}</h3>
                                     </div>
                                     <div className="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center text-red-600">

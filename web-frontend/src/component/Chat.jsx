@@ -8,7 +8,7 @@ function Chat() {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const navigate = useNavigate();
 
-  // Dynamic Initial Welcome Message based on Role
+
   let initialText = `Hello ${user.name || 'User'}! 👋 I am your System Command Assistant. `;
   if (user.role === 'distributor') {
       initialText += 'I can help you track your inventory, pending orders, sales, and market dues.';
@@ -89,7 +89,6 @@ function Chat() {
         aiResponse = `Real-time Data: We currently have ${count} active distributors registered in the system.`;
       } 
       
-      // ----- DISTRIBUTOR & ADMIN QUERIES -----
       else if ((lowerInput.includes('rep') || lowerInput.includes('team') || lowerInput.includes('representative')) && (user.role === 'distributor' || user.role === 'admin')) {
         const res = await api.get('/admin/reps'); 
         const count = res.data.data ? res.data.data.length : 0;
