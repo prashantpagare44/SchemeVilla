@@ -5,8 +5,6 @@ const TopNavbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   
-
-  // Get user details from localStorage
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
   const handleLogout = () => {
@@ -17,7 +15,6 @@ const TopNavbar = () => {
 const chat = ()=>{
   navigate('/chat');
 }
-  // Dynamic title based on the current URL
   const getPageTitle = () => {
       const path = location.pathname;
       if(path === '/dashboard') return 'Overview';
