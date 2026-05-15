@@ -1,6 +1,7 @@
 import Scheme from '../models/SCHEME_MODEL.js';
 import RepProfile from '../models/REP_MODEL.js';
 import DistributorProfile from '../models/DISTRIBUTOR_MODEL.js';
+import RetailerProfile from '../models/RETAILER_MODEL.js';
 
 export const CreateScheme = async (req, res) => {
 
@@ -102,6 +103,14 @@ export const getSchemes = async (req, res) => {
                 filter = { 
                     zoneIds: { $in: repProfile.zoneIds },
                     status: 'approved' // Rep ko sirf valid aur approved schemes dikhani hain
+                };
+            }
+        } else if (req.user.role === 'retailer') {
+            const retailerProfile = await RetailerProfile.findOne({ userId: req.user._id });
+            if (retailerProfile) {
+                filter = { 
+                    zoneIds: retailerProfile.zone, // Sirf retailer ke zone ki schemes
+                    status: 'approved' // Sirf approved offers
                 };
             }
         }
